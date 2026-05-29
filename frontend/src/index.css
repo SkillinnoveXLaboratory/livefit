@@ -1,0 +1,512 @@
+@import "tailwindcss";
+
+@theme {
+  --color-sky-50: #fffaf5;
+  --color-sky-100: #fee7d1;
+  --color-sky-200: #ffb366;
+  --color-sky-300: #ff9933;
+  --color-sky-400: #ff8c1a;
+  --color-sky-500: #ff7f00;
+  --color-sky-600: #e67200;
+  --color-sky-700: #cc6600;
+  --color-sky-800: #b35900;
+  --color-sky-900: #994d00;
+  --color-sky-950: #111111;
+
+  --color-brand-primary: #ff7f00;
+  --color-brand-dark: #111111;
+  --color-brand-white: #fffaf5;
+  
+  --font-serif: "Instrument Serif", serif;
+  --font-sans: "Inter", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-sky-50 text-sky-950 antialiased selection:bg-sky-500 selection:text-white;
+    overflow-x: clip;
+    max-width: 100%;
+  }
+
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-sky-50;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-sky-200 rounded-full border-2 border-sky-50 hover:bg-sky-300 transition-colors;
+  }
+}
+
+.glass {
+  @apply bg-white/80 backdrop-blur-lg border border-sky-100;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-sky-600 to-sky-400;
+  }
+  
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .smooth-transition {
+    @apply transition-all duration-500 ease-in-out;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+.wellness-cards-container {
+  --card-width: 380px;
+  --card-height: 560px;
+  --transition-speed: 0.6s;
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  height: var(--card-height);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 1000px;
+  transition: height var(--transition-speed);
+  margin: 0 auto;
+}
+
+.wellness-card {
+  position: absolute;
+  width: var(--card-width);
+  height: var(--card-height);
+  background-color: #1a2336;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  transform-style: preserve-3d;
+  transition: transform var(--transition-speed) ease-in-out, opacity var(--transition-speed), z-index 0s var(--transition-speed);
+  cursor: pointer;
+  z-index: 1;
+  opacity: 0.6;
+}
+
+.wellness-card.state-center {
+  transform: translateX(0) translateZ(0) scale(1);
+  opacity: 1;
+  z-index: 10;
+  transition: transform var(--transition-speed) ease-in-out, opacity var(--transition-speed), z-index 0s;
+}
+
+.wellness-card.state-left-1 {
+  transform: translateX(-300px) translateZ(-100px) scale(0.85);
+  opacity: 0.7;
+  z-index: 5;
+}
+
+.wellness-card.state-right-1 {
+  transform: translateX(300px) translateZ(-100px) scale(0.85);
+  opacity: 0.7;
+  z-index: 5;
+}
+
+.wellness-card.state-right-2 {
+  transform: translateX(500px) translateZ(-200px) scale(0.75);
+  opacity: 0.5;
+  z-index: 2;
+}
+
+.wellness-card.state-hidden {
+  transform: translateX(1000px) translateZ(-500px) scale(0.5);
+  opacity: 0;
+  z-index: 0;
+}
+
+.number-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.card-number {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  font-size: 16px;
+  flex: 0 0 auto;
+}
+
+.accent-orange .card-number,
+.accent-orange .check-icon {
+  color: #f97316;
+}
+
+.accent-blue .card-number,
+.accent-blue .check-icon {
+  color: #3b82f6;
+}
+
+.accent-green .card-number,
+.accent-green .check-icon {
+  color: #10b981;
+}
+
+.subtitle {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.visual-container {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #252e41;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.visual-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.8);
+}
+
+.check-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.check-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.overlaid-component {
+  position: absolute;
+  background-color: #111827e6;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  border: 1px solid #374151;
+  font-size: 12px;
+}
+
+.wellness-dashboard {
+  top: 20px;
+  right: 20px;
+  width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wellness-dashboard .title,
+.step-leaderboard .title {
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.wellness-score-dial {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto;
+  border-radius: 999px;
+  border: 5px solid #92400e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #f97316;
+  box-shadow: inset 0 0 0 5px rgba(249, 115, 22, 0.18);
+}
+
+.metrics {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 10px;
+}
+
+.metric-item {
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  align-items: center;
+  gap: 4px;
+}
+
+.metric-bar-bg {
+  height: 6px;
+  background-color: #92400e;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.metric-bar-fill {
+  height: 100%;
+  background-color: #f97316;
+  border-radius: 3px;
+}
+
+.stack-badge {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background-color: #2563eb;
+  padding: 5px 10px;
+  border-radius: 999px;
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.step-leaderboard {
+  top: 20px;
+  right: 20px;
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.step-leaderboard ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.step-leaderboard li {
+  display: grid;
+  grid-template-columns: 20px 1fr auto;
+  gap: 4px;
+  font-size: 11px;
+  align-items: center;
+}
+
+.leaderboard-rank {
+  font-weight: 700;
+  color: #3b82f6;
+  text-align: center;
+}
+
+.leaderboard-steps {
+  opacity: 0.7;
+}
+
+.breathing-session {
+  bottom: 20px;
+  right: 20px;
+  width: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.breathing-title {
+  font-weight: 700;
+}
+
+.breathing-status {
+  opacity: 0.7;
+  font-size: 10px;
+}
+
+.breathing-icons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.breathing-wave {
+  width: 20px;
+  height: 12px;
+  background: repeating-linear-gradient(90deg, #10b981 0, #10b981 2px, transparent 2px, transparent 4px);
+  opacity: 0.7;
+}
+
+.play-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 9px;
+}
+
+.learning-modules {
+  bottom: 20px;
+  left: 20px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.card-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #374151;
+  padding-top: 12px;
+  font-size: 12px;
+}
+
+.footer-shield,
+.footer-green-text {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.wellness-card:not(.state-center) .overlaid-component {
+  pointer-events: none;
+}
+
+@media (max-width: 1100px) {
+  .wellness-cards-container {
+    --card-width: 340px;
+    --card-height: 520px;
+  }
+
+  .wellness-card.state-left-1 {
+    transform: translateX(-240px) translateZ(-80px) scale(0.8);
+    opacity: 0.6;
+  }
+
+  .wellness-card.state-right-1 {
+    transform: translateX(240px) translateZ(-80px) scale(0.8);
+    opacity: 0.6;
+  }
+
+  .wellness-card.state-right-2 {
+    transform: translateX(400px) translateZ(-160px) scale(0.7);
+    opacity: 0.4;
+  }
+}
+
+@media (max-width: 800px) {
+  .wellness-cards-container {
+    --card-width: 290px;
+    --card-height: 480px;
+    perspective: none;
+    height: 520px;
+  }
+
+  .wellness-card.state-left-1 {
+    transform: translateX(-180px) scale(0.75);
+    opacity: 0.4;
+  }
+
+  .wellness-card.state-right-1 {
+    transform: translateX(180px) scale(0.75);
+    opacity: 0.4;
+  }
+
+  .wellness-card.state-right-2 {
+    transform: translateX(300px) scale(0.65);
+    opacity: 0.2;
+  }
+
+  .subtitle,
+  .check-list,
+  .overlaid-component {
+    font-size: 11px;
+  }
+
+  .stack-badge {
+    display: none;
+  }
+
+  .wellness-score-dial {
+    width: 50px;
+    height: 50px;
+    font-size: 16px;
+    border-width: 4px;
+  }
+
+  .metric-item {
+    grid-template-columns: 40px 1fr;
+  }
+
+  .wellness-dashboard {
+    width: 130px;
+  }
+
+  .breathing-session {
+    width: 120px;
+  }
+}
+
+@media (max-width: 500px) {
+  .wellness-cards-container {
+    --card-width: 260px;
+    --card-height: 450px;
+  }
+
+  .wellness-card {
+    padding: 18px;
+  }
+
+  .wellness-card.state-left-1 {
+    transform: translateX(-150px) scale(0.7);
+    opacity: 0.3;
+  }
+
+  .wellness-card.state-right-1 {
+    transform: translateX(150px) scale(0.7);
+    opacity: 0.3;
+  }
+
+  .wellness-card.state-right-2 {
+    transform: translateX(250px) scale(0.6);
+    opacity: 0.1;
+  }
+}
