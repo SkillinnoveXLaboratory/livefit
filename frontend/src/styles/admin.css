@@ -36,6 +36,9 @@
   height: 100vh;
   z-index: 1000;
   left: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .admin-sidebar.closed {
@@ -64,6 +67,10 @@
 
 .admin-menu-group {
   padding: 20px 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .admin-menu-label {
@@ -795,6 +802,10 @@
 @media (max-width: 768px) {
   .admin-sidebar {
     left: -250px;
+  }
+
+  .admin-sidebar.open {
+    overflow-y: auto;
   }
 
   .admin-main-wrapper {
