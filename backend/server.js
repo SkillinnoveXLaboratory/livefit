@@ -1731,7 +1731,12 @@ app.post('/api/auth/firebase', async (req, res) => {
 
     const decodedToken = await firebaseAuth.verifyIdToken(idToken);
     const normalizedEmail = String(decodedToken.email || '').trim().toLowerCase();
-    const provider = decodedToken.firebase?.sign_in_provider === 'google.com' ? 'google' : 'firebase';
+    const intent = req.body.intent === 'signup' ? 'signup' : 'signin';
+    const firebaseIdentities = decodedToken.firebase?.identities || {};
+    const hasGoogleIdentity =
+      decodedToken.firebase?.sign_in_provider === 'google.com' ||
+      Boolean(firebaseIdentities['google.com']?.length);
+    const provider = hasGoogleIdentity ? 'google' : 'firebase';
     const signupOtpToken = String(req.body.signupOtpToken || '').trim();
     const hasSignupOtp = verifySignupOtpToken(signupOtpToken, normalizedEmail);
     const requestedPassword = String(req.body.password || '').trim();
@@ -1747,7 +1752,15 @@ app.post('/api/auth/firebase', async (req, res) => {
     let user = await User.findOne({ email: normalizedEmail });
     const existingOtpVerified = Boolean(user?.emailVerified);
 
-    if (provider !== 'google' && decodedToken.email_verified !== true && !hasSignupOtp && !existingOtpVerified) {
+    if (!user && intent === 'signin') {
+      return res.status(404).json({ message: 'No account found for this email. Please create an account first.' });
+    }
+
+    if (user && intent === 'signup') {
+      return res.status(409).json({ message: 'This email is already registered. Please sign in instead.' });
+    }
+
+    if (!hasGoogleIdentity && decodedToken.email_verified !== true && !hasSignupOtp && !existingOtpVerified) {
       return res.status(403).json({ message: 'Please verify your email before signing in' });
     }
 
@@ -1764,7 +1777,7 @@ app.post('/api/auth/firebase', async (req, res) => {
         focusAreas: [],
         firebaseUid: decodedToken.uid,
         authProvider: provider,
-        emailVerified: Boolean(decodedToken.email_verified || hasSignupOtp || provider === 'google'),
+        emailVerified: Boolean(decodedToken.email_verified || hasSignupOtp || hasGoogleIdentity),
       });
       await user.save();
       await sendRegistrationConfirmationEmail({
@@ -1776,7 +1789,7 @@ app.post('/api/auth/firebase', async (req, res) => {
     } else {
       user.firebaseUid = user.firebaseUid || decodedToken.uid;
       user.authProvider = provider;
-      user.emailVerified = Boolean(user.emailVerified || decodedToken.email_verified || hasSignupOtp || provider === 'google');
+      user.emailVerified = Boolean(user.emailVerified || decodedToken.email_verified || hasSignupOtp || hasGoogleIdentity);
       if (!user.name && (req.body.name || decodedToken.name)) {
         user.name = String(req.body.name || decodedToken.name).trim();
       }

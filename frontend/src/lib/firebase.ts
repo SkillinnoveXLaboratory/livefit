@@ -3,11 +3,14 @@ import {
   EmailAuthProvider,
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
+  deleteUser,
   getAuth,
+  getAdditionalUserInfo,
   linkWithCredential,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  updatePassword,
   updateProfile,
 } from 'firebase/auth';
 
@@ -63,11 +66,21 @@ export const signInWithGoogle = async () => {
   }
 
   const credentials = await signInWithPopup(firebaseAuth, googleProvider);
-  return credentials.user;
+  return {
+    user: credentials.user,
+    isNewUser: Boolean(getAdditionalUserInfo(credentials)?.isNewUser),
+  };
+};
+
+export const deleteCurrentFirebaseUser = async () => {
+  if (firebaseAuth?.currentUser) {
+    await deleteUser(firebaseAuth.currentUser);
+  }
 };
 
 export const linkGoogleUserWithPassword = async (email: string, password: string) => {
-  if (!firebaseAuth?.currentUser) {
+  const currentUser = firebaseAuth?.currentUser;
+  if (!currentUser) {
     throw new Error('Google account is not signed in');
   }
 
@@ -78,8 +91,14 @@ export const linkGoogleUserWithPassword = async (email: string, password: string
     throw new Error('Email and password are required');
   }
 
+  const hasPasswordProvider = currentUser.providerData.some((provider) => provider.providerId === 'password');
+  if (hasPasswordProvider) {
+    await updatePassword(currentUser, trimmedPassword);
+    return currentUser;
+  }
+
   const credential = EmailAuthProvider.credential(trimmedEmail, trimmedPassword);
-  const response = await linkWithCredential(firebaseAuth.currentUser, credential);
+  const response = await linkWithCredential(currentUser, credential);
   return response.user;
 };
 

@@ -4,7 +4,14 @@ import { type AuthResponse, storeAuthSession } from './account';
 
 export const syncFirebaseSession = async (
   user: User,
-  options: { role: 'livefit' | 'workfit'; phone?: string; name?: string; password?: string; signupOtpToken?: string }
+  options: {
+    intent: 'signup' | 'signin';
+    role: 'livefit' | 'workfit';
+    phone?: string;
+    name?: string;
+    password?: string;
+    signupOtpToken?: string;
+  }
 ) => {
   const idToken = await user.getIdToken(true);
   const response = await apiClient.post<AuthResponse>('/api/auth/firebase', {
@@ -14,6 +21,7 @@ export const syncFirebaseSession = async (
     name: options.name || user.displayName || '',
     password: options.password || '',
     signupOtpToken: options.signupOtpToken || '',
+    intent: options.intent,
   });
 
   storeAuthSession(response.data);

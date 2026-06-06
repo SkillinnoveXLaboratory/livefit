@@ -118,6 +118,7 @@ const Signup = () => {
 
       const firebaseUser = await createFirebaseUser(formData.name.trim(), formData.email.trim(), formData.password);
       const auth = await syncFirebaseSession(firebaseUser, {
+        intent: 'signup',
         role,
         phone: formData.phone.trim(),
         name: formData.name.trim(),
@@ -153,8 +154,8 @@ const Signup = () => {
     setNotice('');
 
     try {
-      const firebaseUser = await signInWithGoogle();
-      setPendingGoogleUser(firebaseUser);
+      const googleResult = await signInWithGoogle();
+      setPendingGoogleUser(googleResult.user);
       setGoogleDetails({ phone: formData.phone.trim(), password: '' });
       setNotice('Add your phone number and password to complete Google signup.');
     } catch (err: unknown) {
@@ -179,6 +180,7 @@ const Signup = () => {
       );
 
       const auth = await syncFirebaseSession(linkedUser, {
+        intent: 'signup',
         role,
         phone: googleDetails.phone.trim(),
         password: googleDetails.password,

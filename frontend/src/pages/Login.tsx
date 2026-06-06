@@ -4,7 +4,7 @@ import { ArrowRight, Eye, EyeOff, Lock, Mail, UserPlus } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FirebaseError } from 'firebase/app';
 import { getSafeRedirectPath } from '../config/auth';
-import { signInFirebaseUser, signInWithGoogle } from '../lib/firebase';
+import { deleteCurrentFirebaseUser, signInFirebaseUser, signInWithGoogle, signOutFirebaseUser } from '../lib/firebase';
 import { clearPendingSignupProfile, getPendingSignupProfile, syncFirebaseSession } from '../lib/firebaseSession';
 
 const Login = () => {
@@ -45,6 +45,7 @@ const Login = () => {
       const firebaseUser = await signInFirebaseUser(formData.email.trim(), formData.password);
       const pendingProfile = getPendingSignupProfile(formData.email);
       const auth = await syncFirebaseSession(firebaseUser, {
+        intent: 'signin',
         role: pendingProfile?.role || signupRole,
         phone: pendingProfile?.phone || '',
         name: pendingProfile?.name || firebaseUser.displayName || '',
@@ -53,6 +54,7 @@ const Login = () => {
 
       navigate(nextPath || (auth.user.role === 'workfit' ? '/workfit' : '/'));
     } catch (error: unknown) {
+      await signOutFirebaseUser().catch(() => undefined);
       setError(getFirebaseMessage(error));
     } finally {
       setLoading(false);
@@ -65,10 +67,16 @@ const Login = () => {
     setNotice('');
 
     try {
-      const firebaseUser = await signInWithGoogle();
-      const auth = await syncFirebaseSession(firebaseUser, {
+      const googleResult = await signInWithGoogle();
+      if (googleResult.isNewUser) {
+        await deleteCurrentFirebaseUser();
+        throw new Error('No account found for this Google email. Please create an account first.');
+      }
+
+      const auth = await syncFirebaseSession(googleResult.user, {
+        intent: 'signin',
         role: signupRole,
-        name: firebaseUser.displayName || '',
+        name: googleResult.user.displayName || '',
       });
       navigate(nextPath || (auth.user.role === 'workfit' ? '/workfit' : '/'));
     } catch (error: unknown) {
