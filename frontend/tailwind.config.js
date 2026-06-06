@@ -13,7 +13,8 @@ export default {
         'accent': '#e0e0e0',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Source Serif 4', 'serif'],
+        serif: ['Source Serif 4', 'serif'],
       },
       fontSize: {
         'hero': ['4rem', { lineHeight: '1.2' }],

@@ -145,7 +145,7 @@ const Settings = () => {
 
   if (!storedUser || !token) {
     return (
-      <div className="min-h-screen bg-[#F5F5F3] px-4 py-32 sm:px-6">
+      <div className="min-h-screen bg-white px-4 py-32 sm:px-6">
         <div className="mx-auto max-w-3xl">
           <div className="rounded-[2.5rem] border border-orange-100 bg-white p-8 shadow-[0_30px_80px_rgba(15,23,42,0.08)] sm:p-12 text-center">
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 text-orange-500">
@@ -177,18 +177,17 @@ const Settings = () => {
     );
   }
 
-  const membershipCards = overview
-    ? [overview.membershipStatus.livefit, overview.membershipStatus.workfit]
-    : [];
-  const activePlansCount = overview?.totalActivePlans ?? membershipCards.filter((card) => card.hasAccess).length;
+  const livefitMembership = overview?.membershipStatus.livefit || null;
+  const activePlansCount = livefitMembership?.hasAccess ? 1 : 0;
   const activePlansSummary = activePlansCount === 1
     ? 'This means 1 active paid membership is currently running on your account.'
-    : `This means ${activePlansCount} active paid memberships are currently running on your account.`;
+    : 'This means no active paid LiveFit membership is running right now.';
+  const livefitLatestMembership = overview?.latestMembership?.product === 'livefit' ? overview.latestMembership : null;
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#F5F5F3] px-4 pb-20 pt-32 sm:px-6">
+    <div className="min-h-screen overflow-hidden bg-white px-4 pb-20 pt-32 sm:px-6">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-[-8%] top-24 h-72 w-72 rounded-full bg-orange-100/70 blur-3xl" />
+        <div className="absolute left-[-8%] top-24 h-72 w-72 rounded-full bg-slate-50 blur-3xl" />
         <div className="absolute bottom-16 right-[-10%] h-96 w-96 rounded-full bg-sky-100/80 blur-3xl" />
       </div>
 
@@ -211,10 +210,10 @@ const Settings = () => {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
               <div className="rounded-[2rem] border border-white/10 bg-white/10 p-5 backdrop-blur-sm">
                 <p className="mb-2 text-[10px] font-black uppercase tracking-[0.28em] text-orange-200">Current Paid Status</p>
-                <p className="text-2xl font-black">{overview?.latestMembership ? overview.latestMembership.planName : 'Free Access'}</p>
+                <p className="text-2xl font-black">{livefitLatestMembership ? livefitLatestMembership.planName : 'Free Access'}</p>
                 <p className="mt-2 text-sm text-white/70">
-                  {overview?.latestMembership
-                    ? `${overview.latestMembership.product === 'workfit' ? 'WorkFit' : 'LiveFit'} membership is active`
+                  {livefitLatestMembership
+                    ? 'LiveFit membership is active'
                     : 'No paid plan found for this account yet'}
                 </p>
               </div>
@@ -227,16 +226,11 @@ const Settings = () => {
                     ? activePlansSummary
                     : 'You are currently on free access only.'}
                 </p>
-                {overview && overview.activePlanNames.length > 0 && (
+                {livefitMembership?.hasAccess && livefitLatestMembership && (
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {overview.activePlanNames.map((planName) => (
-                      <span
-                        key={planName}
-                        className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white"
-                      >
-                        {planName}
-                      </span>
-                    ))}
+                    <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white">
+                      {livefitLatestMembership.planName}
+                    </span>
                   </div>
                 )}
               </div>
@@ -286,46 +280,49 @@ const Settings = () => {
               </div>
 
               <div className="grid gap-6 md:grid-cols-2">
-                {membershipCards.map((card) => (
+                {livefitMembership ? (
                   <div
-                    key={card.product}
                     className={`rounded-[2.25rem] border p-7 shadow-[0_20px_60px_rgba(15,23,42,0.06)] ${
-                      card.hasAccess
+                      livefitMembership.hasAccess
                         ? 'border-orange-200 bg-gradient-to-br from-white to-orange-50/70'
                         : 'border-slate-200 bg-white'
                     }`}
                   >
                     <div className="mb-6 flex items-start justify-between gap-4">
                       <div>
-                        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.28em] text-orange-500">{card.product}</p>
-                        <h3 className="text-2xl font-black text-sky-950">{card.statusLabel}</h3>
+                        <p className="mb-2 text-[10px] font-black uppercase tracking-[0.28em] text-orange-500">livefit</p>
+                        <h3 className="text-2xl font-black text-sky-950">{livefitMembership.statusLabel}</h3>
                       </div>
                       <div
                         className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
-                          card.hasAccess ? 'bg-orange-500 text-white' : 'bg-slate-100 text-slate-500'
+                          livefitMembership.hasAccess ? 'bg-orange-500 text-white' : 'bg-slate-100 text-slate-500'
                         }`}
                       >
-                        {card.hasAccess ? <BadgeCheck className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />}
+                        {livefitMembership.hasAccess ? <BadgeCheck className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />}
                       </div>
                     </div>
 
                     <div className="mb-5 rounded-[1.5rem] bg-white/70 px-4 py-4">
                       <p className="mb-1 text-[10px] font-black uppercase tracking-[0.22em] text-sky-400">Current Plan</p>
-                      <p className="text-lg font-black text-sky-950">{card.planName}</p>
+                      <p className="text-lg font-black text-sky-950">{livefitMembership.planName}</p>
                     </div>
 
                     <div className="space-y-3 text-sm text-sky-900/65">
                       <div className="flex items-center justify-between gap-4">
                         <span className="font-semibold uppercase tracking-widest text-[10px] text-sky-400">Amount</span>
-                        <span className="font-bold text-sky-950">{formatCurrency(card.amount, card.currency)}</span>
+                        <span className="font-bold text-sky-950">{formatCurrency(livefitMembership.amount, livefitMembership.currency)}</span>
                       </div>
                       <div className="flex items-center justify-between gap-4">
                         <span className="font-semibold uppercase tracking-widest text-[10px] text-sky-400">Updated</span>
-                        <span className="font-bold text-right text-sky-950">{formatDate(card.paidAt)}</span>
+                        <span className="font-bold text-right text-sky-950">{formatDate(livefitMembership.paidAt)}</span>
                       </div>
                     </div>
                   </div>
-                ))}
+                ) : (
+                  <div className="rounded-[2.25rem] border border-slate-200 bg-white p-7 text-sm text-sky-900/60">
+                    No LiveFit plan is currently active on this account.
+                  </div>
+                )}
               </div>
             </section>
 

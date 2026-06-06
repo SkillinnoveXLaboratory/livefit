@@ -1,6 +1,16 @@
 import { apiClient } from './api';
 
-export const WHATSAPP_PHONE = '919890008742';
+const CONTACT_SETTINGS_STORAGE_KEY = 'siteContactSettings';
+
+export type SiteContactSettings = {
+  livefitPhone: string;
+  workfitPhone: string;
+};
+
+const DEFAULT_SITE_CONTACT_SETTINGS: SiteContactSettings = {
+  livefitPhone: '+91 9890008742',
+  workfitPhone: '+1 9256602776',
+};
 
 export type StoredUser = {
   id: string;
@@ -90,6 +100,8 @@ const readStoredJson = <T,>(key: string): T | null => {
   }
 };
 
+const normalizePhoneForWhatsApp = (value: string) => String(value || '').replace(/\D/g, '');
+
 export const getStoredUser = () => readStoredJson<StoredUser>('user');
 
 export const getAuthToken = () => localStorage.getItem('token');
@@ -116,6 +128,26 @@ export const hasStoredPaidAccess = (userEmail?: string | null) => {
   });
 };
 
+export const hasStoredPaidAccessForProduct = (product: 'livefit' | 'workfit', userEmail?: string | null) => {
+  const normalizedUserEmail = normalizeEmail(userEmail);
+
+  return getStoredMemberships().some((membership) => {
+    const membershipProduct = membership.product || 'livefit';
+    if (membershipProduct !== product) {
+      return false;
+    }
+
+    if (!normalizedUserEmail) {
+      return true;
+    }
+
+    const membershipEmail = normalizeEmail(membership.email || membership.customer?.email);
+    return membershipEmail === normalizedUserEmail;
+  });
+};
+
+export const hasStoredAnyPaidAccess = () => getStoredMemberships().length > 0;
+
 export const fetchAccountOverview = async (token: string) => {
   const response = await apiClient.get<AccountOverviewResponse>('/api/account/overview', {
     headers: {
@@ -126,9 +158,32 @@ export const fetchAccountOverview = async (token: string) => {
   return response.data;
 };
 
-export const buildWhatsAppUrl = (message: string, phone = WHATSAPP_PHONE) =>
-  `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+export const getSiteContactSettings = () =>
+  readStoredJson<SiteContactSettings>(CONTACT_SETTINGS_STORAGE_KEY) || DEFAULT_SITE_CONTACT_SETTINGS;
 
-export const redirectToWhatsApp = (message: string, phone = WHATSAPP_PHONE) => {
+export const storeSiteContactSettings = (settings: SiteContactSettings) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const nextSettings: SiteContactSettings = {
+    livefitPhone: String(settings.livefitPhone || DEFAULT_SITE_CONTACT_SETTINGS.livefitPhone).trim(),
+    workfitPhone: String(settings.workfitPhone || DEFAULT_SITE_CONTACT_SETTINGS.workfitPhone).trim(),
+  };
+
+  localStorage.setItem(CONTACT_SETTINGS_STORAGE_KEY, JSON.stringify(nextSettings));
+};
+
+export const getWhatsAppPhone = (product: 'livefit' | 'workfit' = 'livefit') => {
+  const settings = getSiteContactSettings();
+  return product === 'workfit' ? settings.workfitPhone : settings.livefitPhone;
+};
+
+export const buildWhatsAppUrl = (message: string, phone?: string) => {
+  const targetPhone = normalizePhoneForWhatsApp(phone || getWhatsAppPhone('livefit'));
+  return `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`;
+};
+
+export const redirectToWhatsApp = (message: string, phone?: string) => {
   window.location.assign(buildWhatsAppUrl(message, phone));
 };

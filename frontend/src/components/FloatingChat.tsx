@@ -36,6 +36,8 @@ const readGuestProfile = (): ChatProfile => {
   return { name: '', email: '', phone: '' };
 };
 
+const isValidEmail = (value: string) => /^\S+@\S+\.\S+$/.test(value.trim());
+
 const FloatingChat = () => {
   const storedUser = getStoredUser();
   const token = getAuthToken();
@@ -52,7 +54,7 @@ const FloatingChat = () => {
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const authHeaders = useMemo(() => token ? { Authorization: `Bearer ${token}` } : undefined, [token]);
-  const canLoadThread = Boolean(storedUser?.email || profile.email);
+  const canLoadThread = Boolean(storedUser?.email || isValidEmail(profile.email));
 
   useEffect(() => {
     if (!isOpen || !canLoadThread) return undefined;
@@ -95,6 +97,11 @@ const FloatingChat = () => {
     if (!trimmedMessage) return;
     if (!profile.name || !profile.email) {
       setError('Please add your name and email before sending.');
+      return;
+    }
+
+    if (!storedUser && !isValidEmail(profile.email)) {
+      setError('Please enter a valid email address before sending.');
       return;
     }
 

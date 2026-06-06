@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Sparkles,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import {
   fetchYogaChallenges,
   fetchYogaChallengesSection,
@@ -62,6 +63,7 @@ const openLiveFitResource = () => {
 };
 
 const Programs = () => {
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('All Programs');
   const [selectedProgram, setSelectedProgram] = useState<YogaChallenge | null>(null);
   const [programs, setPrograms] = useState<YogaChallenge[]>([]);
@@ -111,7 +113,7 @@ const Programs = () => {
             className="mb-4 block text-sm font-semibold uppercase tracking-wider text-brand-primary"
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.4 }}
+            viewport={{ once: true, amount: 0.4 }}
             transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
           >
             {sectionContent.eyebrow}
@@ -120,7 +122,7 @@ const Programs = () => {
             className="mb-6 font-serif text-5xl text-brand-dark md:text-6xl"
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.35 }}
+            viewport={{ once: true, amount: 0.35 }}
             transition={{ duration: 0.9, ease: [0.23, 1, 0.32, 1], delay: 0.05 }}
           >
             {sectionContent.title}
@@ -129,7 +131,7 @@ const Programs = () => {
             className="mx-auto max-w-2xl text-lg text-gray-600"
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.3 }}
+            viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.9, ease: [0.23, 1, 0.32, 1], delay: 0.1 }}
           >
             {sectionContent.description}
@@ -176,7 +178,7 @@ const Programs = () => {
                     key={program.id}
                     initial={{ opacity: 0, y: 24 }}
                     whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                    viewport={{ once: false, amount: 0.2 }}
+                    viewport={{ once: true, amount: 0.2 }}
                     transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1], delay: index * 0.04 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     onClick={() => setSelectedProgram(program)}
@@ -223,10 +225,10 @@ const Programs = () => {
         )}
 
         <motion.div
-          className="mt-16 flex flex-col items-center justify-between gap-6 rounded-full border border-orange-100/50 bg-[#FFF4E8]/50 px-8 py-4 md:flex-row"
+          className="mt-16 flex flex-col items-center justify-between gap-6 rounded-full border border-orange-100/50 bg-white/50 px-8 py-4 md:flex-row"
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.35 }}
+          viewport={{ once: true, amount: 0.35 }}
           transition={{ duration: 0.9, ease: [0.23, 1, 0.32, 1] }}
         >
           <div className="flex items-center gap-4">
@@ -318,7 +320,10 @@ const Programs = () => {
                   </div>
                 </div>
 
-                <button className="mt-10 w-full rounded-2xl bg-brand-primary py-4 text-sm font-bold uppercase tracking-widest text-white shadow-xl shadow-brand-primary/20 transition-all hover:bg-brand-dark hover:shadow-brand-dark/20">
+                <button
+                  className="mt-10 w-full rounded-2xl bg-brand-primary py-4 text-sm font-bold uppercase tracking-widest text-white shadow-xl shadow-brand-primary/20 transition-all hover:bg-brand-dark hover:shadow-brand-dark/20"
+                  onClick={() => navigate('/livefitinquiry')}
+                >
                   Start This Challenge
                 </button>
               </div>

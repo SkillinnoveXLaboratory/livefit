@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Check, MessageCircleMore, Star, X, Zap } from 'lucide-react';
 import { apiClient } from '../lib/api';
@@ -207,6 +207,18 @@ const Pricing = ({ onAccessGranted }: PricingProps) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (window.location.hash !== '#plans') {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      document.getElementById('plans')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 120);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+
   const redirectToCustomPlanWhatsApp = (plan: Plan) => {
     const storedUser = getStoredUser();
     const paidStatus = hasStoredPaidAccess(storedUser?.email) ? 'Paid user' : 'Free user';
@@ -353,10 +365,10 @@ const Pricing = ({ onAccessGranted }: PricingProps) => {
   const selectedPlanPrice = selectedPlan ? selectedPlan.price : '';
 
   return (
-    <div className="min-h-screen bg-[#F5F5F3] pt-32 pb-20 px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-white pt-32 pb-20 px-6 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-20 left-[-8%] w-72 h-72 rounded-full bg-sky-100/50 blur-3xl" />
-        <div className="absolute bottom-0 right-[-5%] w-96 h-96 rounded-full bg-orange-100/50 blur-3xl" />
+        <div className="absolute bottom-0 right-[-5%] w-96 h-96 rounded-full bg-slate-50 blur-3xl" />
       </div>
 
       <div className="max-w-7xl mx-auto text-center mb-20 relative z-10">
@@ -366,7 +378,7 @@ const Pricing = ({ onAccessGranted }: PricingProps) => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3 max-w-6xl mx-auto relative z-10">
+      <div id="plans" className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3 max-w-6xl mx-auto relative z-10">
         {loadingPlans && (
           <div className="md:col-span-2 xl:col-span-3 rounded-[2rem] border border-sky-100 bg-white p-8 text-center text-sm font-bold text-sky-700 shadow-lg">
             Loading managed packages...

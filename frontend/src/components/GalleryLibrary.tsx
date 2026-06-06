@@ -1,14 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MoveRight, Play, Image as ImageIcon, FileText } from 'lucide-react';
+import { BookOpen, Flower2, MoveRight, Play, Image as ImageIcon, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const sectionReveal = {
-  hidden: { opacity: 0, y: 34 },
+  hidden: { opacity: 0, y: 18 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.9, ease: [0.23, 1, 0.32, 1] },
+    transition: { duration: 0.45, ease: 'easeOut' },
   },
 };
 
@@ -23,16 +23,16 @@ const staggerContainer = {
 };
 
 const cardReveal = (delay = 0, x = 0) => ({
-  hidden: { opacity: 0, y: 40, x, scale: 0.98 },
+  hidden: { opacity: 0, y: 18, x, scale: 0.99 },
   show: {
     opacity: 1,
     y: 0,
     x: 0,
     scale: 1,
     transition: {
-      duration: 0.95,
+      duration: 0.5,
       delay,
-      ease: [0.23, 1, 0.32, 1],
+      ease: 'easeOut',
     },
   },
 });
@@ -85,6 +85,28 @@ const GalleryLibrary: React.FC = () => {
   const navigate = useNavigate();
   const resources = [
     {
+      image: '/images/Gal1.webp',
+      icon: BookOpen,
+      iconBg: 'bg-[#f97316]',
+      title: 'Meditation Library',
+      description:
+        'Guided meditations, breathwork sessions, sleep stories, soothing music, and mindful practices to calm your mind and uplift your spirit.',
+      buttonText: 'EXPLORE LIBRARY',
+      buttonColor: 'border-[#f97316] text-[#c2410c] hover:bg-[#f97316]/5',
+      onClick: () => navigate('/gallery?category=Meditation%20Library'),
+    },
+    {
+      image: '/images/Gal2.webp',
+      icon: Flower2,
+      iconBg: 'bg-[#a855f7]',
+      title: 'Practice Library',
+      description:
+        'Step-by-step pose guides with photos, alignment tips, benefits, and modifications for all levels - from beginners to advanced practitioners.',
+      buttonText: 'EXPLORE PRACTICE',
+      buttonColor: 'border-[#a855f7] text-[#7e22ce] hover:bg-[#a855f7]/5',
+      onClick: () => navigate('/gallery?category=Practice%20Library'),
+    },
+    {
       image: '/images/Gal3.webp',
       icon: Play,
       iconBg: 'bg-[#4ade80]',
@@ -104,7 +126,7 @@ const GalleryLibrary: React.FC = () => {
         'Beautiful moments, inspiring postures, nature, wellness lifestyle, and behind-the-scenes from our community and sessions.',
       buttonText: 'VIEW GALLERY',
       buttonColor: 'border-[#3b82f6] text-[#1d4ed8] hover:bg-[#3b82f6]/5',
-      onClick: () => navigate('/gallery'),
+      onClick: () => navigate('/gallery?category=Picture%20Gallery'),
     },
   ];
 
@@ -116,7 +138,7 @@ const GalleryLibrary: React.FC = () => {
           variants={sectionReveal}
           initial="hidden"
           whileInView="show"
-          viewport={{ once: false, amount: 0.35 }}
+          viewport={{ once: true, amount: 0.25 }}
         >
           <motion.h2 className="mb-8 text-5xl font-bold tracking-tight text-sky-950 md:text-7xl" variants={sectionReveal}>
             Gallery & <span className="text-brand-primary">Library</span>
@@ -131,10 +153,10 @@ const GalleryLibrary: React.FC = () => {
           variants={staggerContainer}
           initial="hidden"
           whileInView="show"
-          viewport={{ once: false, amount: 0.2 }}
+          viewport={{ once: true, amount: 0.15 }}
         >
           {resources.map((res, idx) => (
-            <motion.div key={res.title} variants={cardReveal(0.08 * idx, idx % 2 === 0 ? -70 : 70)}>
+            <motion.div key={res.title} variants={cardReveal(0.04 * idx, idx % 2 === 0 ? -18 : 18)}>
               <ResourceCard {...res} />
             </motion.div>
           ))}
@@ -145,7 +167,7 @@ const GalleryLibrary: React.FC = () => {
           variants={sectionReveal}
           initial="hidden"
           whileInView="show"
-          viewport={{ once: false, amount: 0.3 }}
+          viewport={{ once: true, amount: 0.2 }}
         >
           <div className="flex flex-col items-center gap-6 text-center md:flex-row md:text-left">
             <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-orange-50 bg-white text-[#ff7f00] shadow-lg shadow-orange-100/50">

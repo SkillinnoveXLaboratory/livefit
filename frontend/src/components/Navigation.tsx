@@ -31,61 +31,12 @@ import {
   hasStoredPaidAccess,
 } from '../lib/account';
 
-const solutions = [
-  {
-    name: 'Employee Burnout',
-    slug: 'employee-burnout',
-    desc: 'Stress recovery, resilience, and mindful recharge for tired teams',
-    icon: Brain,
-  },
-  {
-    name: 'Posture & Back Pain',
-    slug: 'posture-back-pain',
-    desc: 'Desk yoga, mobility, ergonomics, and pain relief support',
-    icon: Monitor,
-  },
-  {
-    name: 'Stress & Mental Health',
-    slug: 'stress-mental-health',
-    desc: 'Mindfulness, breathwork, and emotional wellness practices',
-    icon: HeartPulse,
-  },
-  {
-    name: 'Low Employee Engagement',
-    slug: 'low-employee-engagement',
-    desc: 'Team challenges and shared wellness culture for better participation',
-    icon: Users,
-  },
-  {
-    name: 'Hybrid Work Challenges',
-    slug: 'hybrid-work-challenges',
-    desc: 'Wellness routines for remote, hybrid, and distributed teams',
-    icon: Globe2,
-  },
-  {
-    name: 'Low Productivity & Energy',
-    slug: 'low-productivity-energy',
-    desc: 'Energy breaks, focus practices, and habit coaching',
-    icon: Clock,
-  },
-  {
-    name: 'High Healthcare Costs',
-    slug: 'high-healthcare-costs',
-    desc: 'Preventive wellness programs that support healthier lifestyles',
-    icon: Target,
-  },
-  {
-    name: 'Boring Wellness Programs',
-    slug: 'boring-wellness-programs',
-    desc: 'More engaging programs people actually want to join',
-    icon: Sparkles,
-  },
-];
-
 const liveFitSections = [
   { name: 'Home Section', id: 'hero', desc: 'Welcome & dynamic introduction', icon: Sparkles },
   { name: 'Wellness Programs', id: 'unique-needs', desc: 'Personalized wellness offerings', icon: Target },
   { name: 'Our Story', id: 'our-story', desc: 'Our background and philosophy', icon: BookOpen },
+  { name: 'One-on-One Coaching', id: 'one-on-one-coaching', desc: 'Private personal training sessions', icon: User },
+  { name: 'Live Group Zoom Sessions', id: 'live-group-zoom', desc: 'Interactive remote video classes', icon: Monitor },
   { name: 'Transform Habits', id: 'wellness-programs', desc: 'Holistic courses and capsules', icon: HeartPulse },
   { name: 'Global Schedule', id: 'schedule', desc: 'Class times and easy booking calendar', icon: Clock },
   { name: 'Yoga Gallery', id: 'gallery', desc: 'Visual showcase of styles and poses', icon: ImageIcon },
@@ -94,22 +45,40 @@ const liveFitSections = [
 
 const workfitSections = [
   {
-    name: 'Corporate Wellness',
-    id: 'workfit-hero',
-    desc: 'Move better, feel better, and work better',
-    icon: Sparkles,
-  },
-  {
-    name: 'Workplace Challenges',
+    name: 'Wellness Challenges',
     id: 'wellness-challenges',
-    desc: 'The real problems WorkFit solves for teams',
+    desc: 'Step challenges, virtual marathons, team challenges, and custom wellness goals',
     icon: Target,
   },
   {
-    name: 'Wellness Solutions',
+    name: '1-on-1 Coaching',
     id: 'wellness-solutions',
-    desc: 'Stacked program pillars for modern teams',
+    desc: 'Personalized wellness coaching for individual needs',
+    icon: User,
+  },
+  {
+    name: 'Diverse Holistic Wellness programs',
+    id: 'wellness-solutions',
+    desc: 'Movement, nutrition, mindfulness, and recovery',
     icon: Leaf,
+  },
+  {
+    name: 'Mental Health & wellbeing',
+    id: 'wellness-solutions',
+    desc: 'Mindfulness, stress relief, and emotional balance',
+    icon: Brain,
+  },
+  {
+    name: 'On-site & Remote Wellness',
+    id: 'wellness-solutions',
+    desc: 'Wellness that works for in-office and remote teams',
+    icon: Monitor,
+  },
+  {
+    name: 'make breaks Effective',
+    id: 'wellness-solutions',
+    desc: 'Quick resets for energy, posture, and recovery',
+    icon: Clock,
   },
   {
     name: 'Global Employee Engagement',
@@ -146,6 +115,7 @@ const Navigation = () => {
   const user = getStoredUser();
   const token = getAuthToken();
   const settingsPath = user ? '/settings' : AUTH_FALLBACK_PATH;
+  const isWorkFitContext = location.pathname.startsWith('/workfit') || location.pathname.startsWith('/solutions');
   const [hasVerifiedAccess, setHasVerifiedAccess] = useState(() => hasStoredPaidAccess(user?.email));
 
   useEffect(() => {
@@ -229,14 +199,13 @@ const Navigation = () => {
 
   const goToConsultation = () => {
     setIsOpen(false);
-    const isWorkFitContext = location.pathname.startsWith('/workfit') || location.pathname.startsWith('/solutions');
     navigate(isWorkFitContext ? '/workfitinquiry' : '/livefitinquiry', {
       state: { from: `${location.pathname}${location.search}${location.hash}` },
     });
   };
 
   return (
-    <nav className="fixed top-0 left-0 z-50 w-full border-b border-orange-100/50 bg-[#F5F5F3] py-0.5 md:py-1">
+    <nav className="fixed top-0 left-0 z-50 w-full border-b border-orange-100/50 bg-white py-0.5 md:py-1">
       <div className="w-full px-4 md:px-8">
         <div className="flex items-center justify-between">
           <Link to="/">
@@ -248,7 +217,7 @@ const Navigation = () => {
               to="/"
               className="text-sm font-black uppercase tracking-[0.25em] text-sky-950 transition-colors hover:text-orange-600"
             >
-              Home
+              {isWorkFitContext ? 'LiveFit Home' : 'Home'}
             </Link>
 
             <Link
@@ -265,7 +234,13 @@ const Navigation = () => {
             >
               <button
                 type="button"
-                onClick={() => navigate('/solutions')}
+                onClick={() => {
+                  if (isWorkFitContext) {
+                    navigate('/solutions');
+                  } else {
+                    goToHomeSection('unique-needs');
+                  }
+                }}
                 className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.25em] text-sky-950 transition-colors hover:text-orange-600"
               >
                 <span>Solutions</span>
@@ -281,12 +256,59 @@ const Navigation = () => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 16, scale: 0.98 }}
                     transition={{ duration: 0.18 }}
-                    className="absolute left-1/2 top-full z-[90] mt-6 w-[960px] max-w-[calc(100vw-6rem)] -translate-x-1/2 overflow-hidden rounded-[26px] border border-slate-700/60 shadow-2xl"
+                    className="fixed left-1/2 top-[88px] z-[90] w-[min(920px,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-[26px] border border-slate-700/60 shadow-2xl"
                   >
-                    <div className="grid grid-cols-[1fr_1fr_0.92fr]">
+                    {isWorkFitContext ? (
+                      <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr]">
+                        <div className="bg-[#10161d] p-6 lg:p-8">
+                          <p className="mb-5 text-[11px] font-black uppercase tracking-[0.32em] text-orange-400">Challenges</p>
+                          <button
+                            type="button"
+                            onClick={() => goToWorkFitSection('wellness-challenges')}
+                            className="block w-full rounded-[22px] border border-orange-500/20 bg-orange-500/10 p-5 text-left transition-colors hover:bg-orange-500/15"
+                          >
+                            <div className="mb-2 text-lg font-black text-white">Wellness Challenges</div>
+                            <p className="text-sm leading-relaxed text-slate-400">Step challenges, virtual marathons, team challenges, and custom wellness goals</p>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveDropdown(null);
+                              navigate('/solutions/employee-burnout');
+                            }}
+                            className="mt-5 flex w-full items-center justify-between rounded-2xl bg-white px-4 py-3 text-left text-[11px] font-black uppercase tracking-[0.22em] text-sky-950"
+                          >
+                            View All Solutions
+                            <ChevronRight className="h-4 w-4 text-orange-500" />
+                          </button>
+                        </div>
+
+                        <div className="border-t border-white/5 bg-[#171f29] p-6 lg:border-l lg:border-t-0 lg:p-8">
+                          <p className="mb-5 text-[11px] font-black uppercase tracking-[0.32em] text-orange-400">Other Solutions</p>
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            {workfitSections.slice(1).map((item) => (
+                              <button
+                                key={`${item.name}-${item.id}`}
+                                type="button"
+                                onClick={() => goToWorkFitSection(item.id)}
+                                className="flex items-start gap-3 rounded-2xl p-3 text-left transition-colors hover:bg-white/5"
+                              >
+                                <div className="mt-0.5 rounded-xl bg-white/5 p-2 text-slate-300">
+                                  <item.icon className="h-5 w-5" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="mb-1 text-[14px] font-semibold text-white break-words">{item.name}</div>
+                                  <div className="text-[12px] leading-relaxed text-slate-400 break-words">{item.desc}</div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
                       <div className="bg-[#10161d] p-8">
-                        <p className="mb-5 text-[11px] font-black uppercase tracking-[0.32em] text-orange-400">Explore Page</p>
-                        <div className="grid gap-3">
+                        <p className="mb-5 text-[11px] font-black uppercase tracking-[0.32em] text-orange-400">Core Sections</p>
+                        <div className="grid grid-cols-2 gap-3">
                           {liveFitSections.map((item) => (
                             <button
                               key={item.id}
@@ -305,91 +327,36 @@ const Navigation = () => {
                           ))}
                         </div>
                       </div>
-
-                      <div className="border-l border-white/5 bg-[#171f29] p-8">
-                        <p className="mb-5 text-[11px] font-black uppercase tracking-[0.32em] text-orange-400">WorkFit Sections</p>
-                        <div className="grid gap-3">
-                          {workfitSections.map((item) => (
-                            <button
-                              key={item.id}
-                              type="button"
-                              onClick={() => goToWorkFitSection(item.id)}
-                              className="flex items-start gap-3 rounded-2xl p-3 text-left transition-colors hover:bg-white/5"
-                            >
-                              <div className="mt-0.5 rounded-xl bg-white/5 p-2 text-slate-300">
-                                <item.icon className="h-5 w-5" />
-                              </div>
-                              <div>
-                                <div className="mb-1 text-[14px] font-semibold text-white">{item.name}</div>
-                                <div className="text-[12px] leading-relaxed text-slate-400">{item.desc}</div>
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="border-l border-white/5 bg-[#1f2833] p-8">
-                        <p className="mb-5 text-[11px] font-black uppercase tracking-[0.32em] text-orange-400">Signature Solutions</p>
-                        <div className="space-y-3">
-                          {solutions.map((item) => (
-                            <Link
-                              key={item.slug}
-                              to={`/solutions/${item.slug}`}
-                              onClick={() => setActiveDropdown(null)}
-                              className="block rounded-2xl border border-white/5 bg-white/[0.03] p-4 transition-colors hover:bg-white/[0.07]"
-                            >
-                              <div className="mb-2 flex items-center gap-3">
-                                <item.icon className="h-5 w-5 text-orange-400" />
-                                <span className="text-[13px] font-semibold text-white">{item.name}</span>
-                              </div>
-                              <p className="text-[12px] leading-relaxed text-slate-400">{item.desc}</p>
-                            </Link>
-                          ))}
-                        </div>
-
-                        <div className="mt-6 rounded-[22px] border border-orange-500/20 bg-orange-500/10 p-4">
-                          <p className="mb-4 text-[11px] font-black uppercase tracking-[0.28em] text-orange-300">Quick Access</p>
-                          <div className="space-y-3">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setActiveDropdown(null);
-                                navigate('/solutions');
-                              }}
-                              className="flex w-full items-center justify-between rounded-2xl bg-white px-4 py-3 text-left text-[11px] font-black uppercase tracking-[0.22em] text-sky-950"
-                            >
-                              View All Solutions
-                              <ChevronRight className="h-4 w-4 text-orange-500" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            <Link
-              to="/pricing"
-              className="text-sm font-black uppercase tracking-[0.25em] text-sky-950 transition-colors hover:text-orange-600"
-            >
-              Plans
-            </Link>
+            {!isWorkFitContext && (
+              <>
+                <Link
+                  to="/pricing"
+                  className="text-sm font-black uppercase tracking-[0.25em] text-sky-950 transition-colors hover:text-orange-600"
+                >
+                  Plans
+                </Link>
 
-            <Link
-              to="/playlists"
-              className="text-sm font-black uppercase tracking-[0.25em] text-sky-950 transition-colors hover:text-orange-600"
-            >
-              Playlist
-            </Link>
+                <Link
+                  to="/playlists"
+                  className="text-sm font-black uppercase tracking-[0.25em] text-sky-950 transition-colors hover:text-orange-600"
+                >
+                  Playlist
+                </Link>
 
-            <Link
-              to={settingsPath}
-              className="text-sm font-black uppercase tracking-[0.25em] text-sky-950 transition-colors hover:text-orange-600"
-            >
-              Settings
-            </Link>
+                <Link
+                  to={settingsPath}
+                  className="text-sm font-black uppercase tracking-[0.25em] text-sky-950 transition-colors hover:text-orange-600"
+                >
+                  Settings
+                </Link>
+              </>
+            )}
 
             <motion.button
               whileHover={{ scale: 1.05, boxShadow: '0 20px 40px -10px rgba(249, 115, 22, 0.25)' }}
@@ -471,7 +438,7 @@ const Navigation = () => {
                             setActiveDropdown(null);
                             navigate('/pricing');
                           }}
-                          className="w-full rounded-2xl px-4 py-4 text-left transition-all hover:bg-orange-50/50 hover:text-orange-600"
+                          className="w-full rounded-2xl px-4 py-4 text-left transition-all hover:bg-white hover:text-orange-600"
                         >
                           <div className="flex items-center gap-4">
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
@@ -490,7 +457,7 @@ const Navigation = () => {
                             setActiveDropdown(null);
                             navigate('/playlists');
                           }}
-                          className="w-full rounded-2xl px-4 py-4 text-left transition-all hover:bg-orange-50/50 hover:text-orange-600"
+                          className="w-full rounded-2xl px-4 py-4 text-left transition-all hover:bg-white hover:text-orange-600"
                         >
                           <div className="flex items-center gap-4">
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
@@ -509,7 +476,7 @@ const Navigation = () => {
                             setActiveDropdown(null);
                             navigate('/settings');
                           }}
-                          className="w-full rounded-2xl px-4 py-4 text-left transition-all hover:bg-orange-50/50 hover:text-orange-600"
+                          className="w-full rounded-2xl px-4 py-4 text-left transition-all hover:bg-white hover:text-orange-600"
                         >
                           <div className="flex items-center gap-4">
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
@@ -525,7 +492,7 @@ const Navigation = () => {
                         <button
                           type="button"
                           onClick={handleLogout}
-                          className="w-full rounded-2xl px-4 py-4 text-left transition-all hover:bg-orange-50/50 hover:text-orange-600"
+                          className="w-full rounded-2xl px-4 py-4 text-left transition-all hover:bg-white hover:text-orange-600"
                         >
                           <div className="flex items-center gap-4">
                             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
@@ -573,7 +540,7 @@ const Navigation = () => {
                   onClick={() => setIsOpen(false)}
                   className="text-2xl font-serif font-bold italic text-sky-950 md:text-3xl"
                 >
-                  Home
+                  {isWorkFitContext ? 'LiveFit Home' : 'Home'}
                 </Link>
 
                 <Link
@@ -585,45 +552,49 @@ const Navigation = () => {
                 </Link>
 
                 <Link
-                  to="/solutions"
+                  to={isWorkFitContext ? '/solutions' : '/#unique-needs'}
                   onClick={() => setIsOpen(false)}
                   className="text-2xl font-serif font-bold italic text-sky-950 md:text-3xl"
                 >
                   Solutions
                 </Link>
 
-                <Link
-                  to="/pricing"
-                  onClick={() => setIsOpen(false)}
-                  className="text-2xl font-serif font-bold italic text-sky-950 md:text-3xl"
-                >
-                  Plans
-                </Link>
+                {!isWorkFitContext && (
+                  <>
+                    <Link
+                      to="/pricing"
+                      onClick={() => setIsOpen(false)}
+                      className="text-2xl font-serif font-bold italic text-sky-950 md:text-3xl"
+                    >
+                      Plans
+                    </Link>
 
-                <Link
-                  to="/playlists"
-                  onClick={() => setIsOpen(false)}
-                  className="text-2xl font-serif font-bold italic text-sky-950 md:text-3xl"
-                >
-                  Playlist
-                </Link>
+                    <Link
+                      to="/playlists"
+                      onClick={() => setIsOpen(false)}
+                      className="text-2xl font-serif font-bold italic text-sky-950 md:text-3xl"
+                    >
+                      Playlist
+                    </Link>
 
-                <Link
-                  to={settingsPath}
-                  onClick={() => setIsOpen(false)}
-                  className="text-2xl font-serif font-bold italic text-sky-950 md:text-3xl"
-                >
-                  Settings
-                </Link>
+                    <Link
+                      to={settingsPath}
+                      onClick={() => setIsOpen(false)}
+                      className="text-2xl font-serif font-bold italic text-sky-950 md:text-3xl"
+                    >
+                      Settings
+                    </Link>
+                  </>
+                )}
 
                 <div className="mt-8">
-                  <span className="mb-6 block text-[10px] font-black uppercase tracking-[0.4em] text-orange-400">Explore Page</span>
+                  <span className="mb-6 block text-[10px] font-black uppercase tracking-[0.4em] text-orange-400">{isWorkFitContext ? 'WorkFit Solutions' : 'Core Sections'}</span>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    {liveFitSections.map((item) => (
+                    {(isWorkFitContext ? workfitSections : liveFitSections).map((item) => (
                       <button
-                        key={item.id}
+                        key={`${item.name}-${item.id}`}
                         type="button"
-                        onClick={() => goToHomeSection(item.id)}
+                        onClick={() => isWorkFitContext ? goToWorkFitSection(item.id) : goToHomeSection(item.id)}
                         className="flex w-full items-center gap-4 text-left"
                       >
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 md:h-12 md:w-12">
@@ -636,34 +607,25 @@ const Navigation = () => {
                       </button>
                     ))}
                   </div>
-                </div>
-
-                <div className="mt-8">
-                  <span className="mb-6 block text-[10px] font-black uppercase tracking-[0.4em] text-orange-400">WorkFit Sections</span>
-                  <div className="grid grid-cols-1 gap-4">
-                    {workfitSections.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => goToWorkFitSection(item.id)}
-                        className="flex w-full items-center gap-4 text-left"
-                      >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 md:h-12 md:w-12">
-                          <item.icon className="h-5 w-5 md:h-6 md:w-6" />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="mb-1 text-lg font-serif font-bold italic leading-none text-sky-950 md:text-xl">{item.name}</span>
-                          <span className="text-[10px] font-bold leading-tight text-sky-400 md:text-xs">{item.desc}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                  {isWorkFitContext && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsOpen(false);
+                        navigate('/solutions/employee-burnout');
+                      }}
+                      className="mt-6 flex w-full items-center justify-center gap-2 rounded-[1.4rem] bg-sky-950 px-5 py-4 text-[11px] font-black uppercase tracking-[0.24em] text-white"
+                    >
+                      View All Solutions
+                      <ChevronRight className="h-4 w-4 text-orange-300" />
+                    </button>
+                  )}
                 </div>
               </div>
 
               <div className="mt-auto pt-12">
                 {user ? (
-                  <div className="mb-6 rounded-[2rem] border border-orange-100/50 bg-orange-50/50 p-6">
+                  <div className="mb-6 rounded-[2rem] border border-orange-100/50 bg-white p-6">
                     <div className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-4">
                         <div className="relative">
@@ -699,32 +661,34 @@ const Navigation = () => {
                       </button>
                     </div>
 
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                      <Link
-                        to="/pricing"
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center justify-center gap-2 rounded-[1.4rem] bg-white px-5 py-4 text-[11px] font-black uppercase tracking-[0.24em] text-sky-950"
-                      >
-                        Plans
-                        <Sparkles className="h-4 w-4 text-orange-500" />
-                      </Link>
-                      <Link
-                        to="/playlists"
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center justify-center gap-2 rounded-[1.4rem] bg-white px-5 py-4 text-[11px] font-black uppercase tracking-[0.24em] text-sky-950"
-                      >
-                        Playlist
-                        <BookOpen className="h-4 w-4 text-orange-500" />
-                      </Link>
-                      <Link
-                        to="/settings"
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center justify-center gap-2 rounded-[1.4rem] bg-white px-5 py-4 text-[11px] font-black uppercase tracking-[0.24em] text-sky-950"
-                      >
-                        Settings
-                        <Settings2 className="h-4 w-4 text-orange-500" />
-                      </Link>
-                    </div>
+                    {!isWorkFitContext && (
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        <Link
+                          to="/pricing"
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center justify-center gap-2 rounded-[1.4rem] bg-white px-5 py-4 text-[11px] font-black uppercase tracking-[0.24em] text-sky-950"
+                        >
+                          Plans
+                          <Sparkles className="h-4 w-4 text-orange-500" />
+                        </Link>
+                        <Link
+                          to="/playlists"
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center justify-center gap-2 rounded-[1.4rem] bg-white px-5 py-4 text-[11px] font-black uppercase tracking-[0.24em] text-sky-950"
+                        >
+                          Playlist
+                          <BookOpen className="h-4 w-4 text-orange-500" />
+                        </Link>
+                        <Link
+                          to="/settings"
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center justify-center gap-2 rounded-[1.4rem] bg-white px-5 py-4 text-[11px] font-black uppercase tracking-[0.24em] text-sky-950"
+                        >
+                          Settings
+                          <Settings2 className="h-4 w-4 text-orange-500" />
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <Link

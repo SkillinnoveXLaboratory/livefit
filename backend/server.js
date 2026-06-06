@@ -14,9 +14,16 @@ const nodemailer = require('nodemailer');
 const multer = require('multer');
 const sharp = require('sharp');
 const firebaseAdmin = require('firebase-admin');
+const {
+  deleteR2Object,
+  getR2Object,
+  isR2Configured,
+  uploadR2Object,
+} = require('./lib/r2Storage');
 const { defaultYogaPrograms, yogaProgramsSection } = require('./data/defaultYogaPrograms');
 const { defaultWorkfitChallenges } = require('./data/defaultWorkfitChallenges');
 const { defaultYogaChallenges, yogaChallengesSection } = require('./data/defaultYogaChallenges');
+const { defaultYogaTypes } = require('./data/defaultYogaTypes');
 
 const app = express();
 app.use(express.json());
@@ -32,6 +39,41 @@ if (!fs.existsSync(imagesDir)) {
   fs.mkdirSync(imagesDir, { recursive: true });
 }
 
+async function serveR2Media(req, res, next, prefix) {
+  if (!isR2Configured) {
+    return next();
+  }
+
+  try {
+    const object = await getR2Object(`${prefix}/${path.basename(req.params.fileName)}`);
+    res.setHeader('Content-Type', object.ContentType || 'application/octet-stream');
+    res.setHeader('Cache-Control', object.CacheControl || 'public, max-age=31536000, immutable');
+    if (object.ContentLength) {
+      res.setHeader('Content-Length', String(object.ContentLength));
+    }
+
+    if (typeof object.Body?.pipe === 'function') {
+      return object.Body.pipe(res);
+    }
+
+    const body = await object.Body.transformToByteArray();
+    return res.send(Buffer.from(body));
+  } catch (error) {
+    if (error?.$metadata?.httpStatusCode === 404 || error?.name === 'NoSuchKey') {
+      return next();
+    }
+
+    console.error(`R2 ${prefix} fetch failed:`, error);
+    return res.status(502).json({ message: 'Failed to load image' });
+  }
+}
+
+app.get('/uploads/:fileName', async (req, res, next) => {
+  return serveR2Media(req, res, next, 'uploads');
+});
+app.get('/images/:fileName', async (req, res, next) => {
+  return serveR2Media(req, res, next, 'images');
+});
 app.use('/uploads', express.static(uploadsDir));
 app.use('/images', express.static(imagesDir));
 
@@ -130,6 +172,21 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
+const emailOtpSchema = new mongoose.Schema(
+  {
+    email: { type: String, required: true, index: true },
+    otpHash: { type: String, required: true },
+    attempts: { type: Number, default: 0 },
+    expiresAt: { type: Date, required: true, index: { expires: 0 } },
+    createdAt: { type: Date, default: Date.now },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const EmailOtp = mongoose.model('EmailOtp', emailOtpSchema);
+
 const paymentSchema = new mongoose.Schema({
   product: { type: String, enum: ['livefit', 'workfit'], default: 'livefit' },
   planId: { type: String, required: true },
@@ -180,6 +237,27 @@ const yogaProgramSchema = new mongoose.Schema(
 );
 
 const YogaProgram = mongoose.model('YogaProgram', yogaProgramSchema);
+
+const yogaTypeSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true, unique: true },
+    tagline: { type: String, required: true },
+    desc: { type: String, required: true },
+    image: { type: String, required: true },
+    iconKey: { type: String, default: 'leaf' },
+    overview: { type: String, required: true },
+    details: { type: String, required: true },
+    benefits: { type: [String], default: [] },
+    perfectFor: { type: [String], default: [] },
+    displayOrder: { type: Number, default: 0 },
+    isActive: { type: Boolean, default: true },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const YogaType = mongoose.model('YogaType', yogaTypeSchema);
 
 const yogaChallengeSchema = new mongoose.Schema(
   {
@@ -266,6 +344,7 @@ const galleryImageSchema = new mongoose.Schema(
     title: { type: String, required: true },
     image: { type: String, required: true },
     alt: { type: String, default: '' },
+    category: { type: String, default: 'Picture Gallery' },
     displayOrder: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
   },
@@ -291,6 +370,7 @@ const chatThreadSchema = new mongoose.Schema(
     userName: { type: String, default: 'Guest User' },
     email: { type: String, default: '' },
     phone: { type: String, default: '' },
+    guestIp: { type: String, default: '' },
     messages: { type: [chatMessageSchema], default: [] },
     status: { type: String, enum: ['open', 'closed'], default: 'open' },
     lastMessageAt: { type: Date, default: Date.now },
@@ -302,6 +382,7 @@ const chatThreadSchema = new mongoose.Schema(
 
 chatThreadSchema.index({ userId: 1 });
 chatThreadSchema.index({ email: 1 });
+chatThreadSchema.index({ guestIp: 1 });
 chatThreadSchema.index({ lastMessageAt: -1 });
 
 const ChatThread = mongoose.model('ChatThread', chatThreadSchema);
@@ -343,8 +424,15 @@ async function convertUploadToWebp(file, prefix = 'upload') {
     .slice(0, 48) || prefix;
 
   const fileName = `${prefix}-${safeBaseName}-${Date.now()}.webp`;
-  const absolutePath = path.join(uploadsDir, fileName);
-  await sharp(file.buffer).webp({ quality: 82 }).toFile(absolutePath);
+  const webpBuffer = await sharp(file.buffer).webp({ quality: 82 }).toBuffer();
+
+  if (isR2Configured) {
+    await uploadR2Object(`uploads/${fileName}`, webpBuffer, 'image/webp');
+  } else {
+    const absolutePath = path.join(uploadsDir, fileName);
+    await fs.promises.writeFile(absolutePath, webpBuffer);
+  }
+
   return `/uploads/${fileName}`;
 }
 
@@ -371,6 +459,53 @@ function buildAuthResponse(user) {
     token: createUserToken(user),
     user: sanitizeUser(user),
   };
+}
+
+function createSignupOtpToken(email) {
+  return jwt.sign(
+    {
+      email,
+      purpose: 'signup-otp',
+    },
+    process.env.JWT_SECRET || 'secret',
+    { expiresIn: '15m' }
+  );
+}
+
+function verifySignupOtpToken(token, email) {
+  if (!token) {
+    return false;
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+    return decoded?.purpose === 'signup-otp' && decoded?.email === email;
+  } catch {
+    return false;
+  }
+}
+
+function generateEmailOtp() {
+  return String(crypto.randomInt(100000, 1000000));
+}
+
+async function sendSignupOtpEmail({ email, name, otp }) {
+  const mailOptions = {
+    from: `"LiveFit" <${EMAIL_FROM}>`,
+    to: email,
+    subject: 'Your LiveFit signup OTP',
+    html: `
+      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#111827">
+        <h2 style="margin:0 0 12px;color:#f97316">LiveFit Email Verification</h2>
+        <p>Hi ${String(name || 'there').trim()},</p>
+        <p>Use this one-time code to complete your LiveFit account signup:</p>
+        <div style="font-size:28px;font-weight:800;letter-spacing:8px;background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;padding:16px 22px;display:inline-block;color:#111827">${otp}</div>
+        <p>This code expires in 10 minutes. If you did not request this, you can ignore this email.</p>
+      </div>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
 }
 
 function mapPaymentRecord(payment) {
@@ -521,6 +656,48 @@ function sanitizeYogaProgram(program) {
     isActive: program.isActive,
     createdAt: program.createdAt,
     updatedAt: program.updatedAt,
+  };
+}
+
+function normalizeYogaTypePayload(body, imagePath) {
+  const normalizedTitle = String(body.title || '').trim();
+  const normalizedTagline = String(body.tagline || '').trim();
+  const normalizedDesc = String(body.desc || '').trim();
+  const normalizedOverview = String(body.overview || '').trim();
+  const normalizedDetails = String(body.details || '').trim();
+  const normalizedImage = imagePath || String(body.image || body.imagePath || '').trim();
+
+  return {
+    title: normalizedTitle,
+    tagline: normalizedTagline,
+    desc: normalizedDesc,
+    image: normalizedImage,
+    iconKey: String(body.iconKey || 'leaf').trim() || 'leaf',
+    overview: normalizedOverview,
+    details: normalizedDetails,
+    benefits: parseBenefits(body.benefits),
+    perfectFor: parseBenefits(body.perfectFor),
+    displayOrder: Number(body.displayOrder || 0) || 0,
+    isActive: normalizeBoolean(body.isActive, true),
+  };
+}
+
+function sanitizeYogaType(type) {
+  return {
+    id: type._id,
+    title: type.title,
+    tagline: type.tagline,
+    desc: type.desc,
+    image: type.image,
+    iconKey: type.iconKey,
+    overview: type.overview,
+    details: type.details,
+    benefits: type.benefits,
+    perfectFor: type.perfectFor,
+    displayOrder: type.displayOrder,
+    isActive: type.isActive,
+    createdAt: type.createdAt,
+    updatedAt: type.updatedAt,
   };
 }
 
@@ -729,10 +906,10 @@ function sanitizePackage(plan) {
 }
 
 const defaultGalleryImages = [
-  { title: 'Quick Wellness Practice', image: '/images/Gal3.webp', alt: 'Guided wellness video session', displayOrder: 1, isActive: true },
-  { title: 'Community Yoga Moment', image: '/images/Gal4.webp', alt: 'Yoga and wellness community moment', displayOrder: 2, isActive: true },
-  { title: 'Mindful Practice', image: '/images/3.webp', alt: 'Mindful yoga practice', displayOrder: 3, isActive: true },
-  { title: 'Outdoor Wellness', image: '/images/7.webp', alt: 'Outdoor wellness lifestyle', displayOrder: 4, isActive: true },
+  { title: 'Quick Wellness Practice', image: '/images/Gal3.webp', alt: 'Guided wellness video session', category: 'Meditation Library', displayOrder: 1, isActive: true },
+  { title: 'Community Yoga Moment', image: '/images/Gal4.webp', alt: 'Yoga and wellness community moment', category: 'Picture Gallery', displayOrder: 2, isActive: true },
+  { title: 'Mindful Practice', image: '/images/3.webp', alt: 'Mindful yoga practice', category: 'Practice Library', displayOrder: 3, isActive: true },
+  { title: 'Outdoor Wellness', image: '/images/7.webp', alt: 'Outdoor wellness lifestyle', category: 'Picture Gallery', displayOrder: 4, isActive: true },
 ];
 
 function normalizeGalleryImagePayload(body, imagePath) {
@@ -741,6 +918,7 @@ function normalizeGalleryImagePayload(body, imagePath) {
     title,
     image: imagePath || String(body.image || body.imagePath || '').trim(),
     alt: String(body.alt || title).trim(),
+    category: String(body.category || 'Picture Gallery').trim() || 'Picture Gallery',
     displayOrder: Number(body.displayOrder || 0) || 0,
     isActive: normalizeBoolean(body.isActive, true),
   };
@@ -752,6 +930,7 @@ function sanitizeGalleryImage(item) {
     title: item.title,
     image: item.image,
     alt: item.alt,
+    category: item.category || 'Picture Gallery',
     displayOrder: item.displayOrder,
     isActive: item.isActive,
     createdAt: item.createdAt,
@@ -782,6 +961,12 @@ function sanitizeChatThread(thread) {
 function removeUploadedFile(filePath) {
   if (!filePath || !String(filePath).startsWith('/uploads/')) {
     return;
+  }
+
+  if (isR2Configured) {
+    deleteR2Object(filePath).catch((error) => {
+      console.error('Failed to delete R2 upload:', error);
+    });
   }
 
   const absolutePath = path.join(uploadsDir, path.basename(filePath));
@@ -885,14 +1070,19 @@ async function getChatSettings() {
   };
 }
 
-async function findOrCreateChatThread({ user, name, email, phone }) {
+async function findOrCreateChatThread({ user, name, email, phone, guestIp }) {
   const normalizedEmail = String(email || user?.email || '').trim().toLowerCase();
   const normalizedPhone = String(phone || user?.phone || '').trim();
+  const normalizedGuestIp = String(guestIp || '').trim();
   const displayName = String(name || user?.name || normalizedEmail || 'Guest User').trim();
   let thread = null;
 
   if (user?._id) {
     thread = await ChatThread.findOne({ userId: user._id });
+  }
+
+  if (!thread && normalizedGuestIp) {
+    thread = await ChatThread.findOne({ guestIp: normalizedGuestIp });
   }
 
   if (!thread && normalizedEmail) {
@@ -905,6 +1095,7 @@ async function findOrCreateChatThread({ user, name, email, phone }) {
       userName: displayName,
       email: normalizedEmail,
       phone: normalizedPhone,
+      guestIp: normalizedGuestIp,
       messages: [],
       lastMessageAt: new Date(),
     });
@@ -914,6 +1105,7 @@ async function findOrCreateChatThread({ user, name, email, phone }) {
   thread.userName = displayName || thread.userName;
   thread.email = normalizedEmail || thread.email;
   thread.phone = normalizedPhone || thread.phone;
+  thread.guestIp = normalizedGuestIp || thread.guestIp;
 
   return thread;
 }
@@ -1040,6 +1232,12 @@ async function seedDefaultYogaProgramsIfNeeded() {
       console.log(`Seeded ${defaultYogaPrograms.length} default yoga programs.`);
     }
 
+    const existingYogaTypesCount = await YogaType.countDocuments();
+    if (existingYogaTypesCount === 0) {
+      await YogaType.insertMany(defaultYogaTypes);
+      console.log(`Seeded ${defaultYogaTypes.length} default yoga types.`);
+    }
+
     const existingYogaChallengesCount = await YogaChallenge.countDocuments();
     if (existingYogaChallengesCount === 0) {
       await YogaChallenge.insertMany(defaultYogaChallenges);
@@ -1082,6 +1280,19 @@ async function seedDefaultYogaProgramsIfNeeded() {
     if (existingGalleryCount === 0) {
       await GalleryImage.insertMany(defaultGalleryImages);
       console.log(`Seeded ${defaultGalleryImages.length} default gallery images.`);
+    } else {
+      await GalleryImage.updateMany(
+        { $or: [{ category: { $exists: false } }, { category: '' }] },
+        { $set: { category: 'Picture Gallery' } }
+      );
+      await GalleryImage.updateOne(
+        { title: 'Quick Wellness Practice' },
+        { $set: { category: 'Meditation Library' } }
+      );
+      await GalleryImage.updateOne(
+        { title: 'Mindful Practice' },
+        { $set: { category: 'Practice Library' } }
+      );
     }
 
     await getChatSettings();
@@ -1404,6 +1615,84 @@ app.post('/api/auth/signup', async (req, res) => {
   }
 });
 
+app.post('/api/auth/signup/send-otp', async (req, res) => {
+  try {
+    const { name, email, phone, password } = req.body;
+    const normalizedEmail = email ? String(email).trim().toLowerCase() : '';
+    const normalizedPhone = phone ? String(phone).trim() : '';
+
+    if (!name || !normalizedEmail || !normalizedPhone || !password) {
+      return res.status(400).json({ message: 'Name, email, phone, and password are required' });
+    }
+
+    if (String(password).length < 6) {
+      return res.status(400).json({ message: 'Password should be at least 6 characters.' });
+    }
+
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already exists. Please login instead.' });
+    }
+
+    const otp = generateEmailOtp();
+    const otpHash = await bcrypt.hash(otp, await bcrypt.genSalt(10));
+
+    await EmailOtp.deleteMany({ email: normalizedEmail });
+    await EmailOtp.create({
+      email: normalizedEmail,
+      otpHash,
+      attempts: 0,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    });
+
+    await sendSignupOtpEmail({ email: normalizedEmail, name, otp });
+    res.json({
+      message: 'OTP sent successfully. Please check your email.',
+      expiresInMs: 10 * 60 * 1000,
+    });
+  } catch (err) {
+    console.error('Signup OTP send error:', err);
+    res.status(500).json({ message: 'Failed to send OTP. Please try again.' });
+  }
+});
+
+app.post('/api/auth/signup/verify-otp', async (req, res) => {
+  try {
+    const normalizedEmail = req.body.email ? String(req.body.email).trim().toLowerCase() : '';
+    const otp = String(req.body.otp || '').trim();
+
+    if (!normalizedEmail || !otp) {
+      return res.status(400).json({ message: 'Email and OTP are required' });
+    }
+
+    const otpRecord = await EmailOtp.findOne({ email: normalizedEmail }).sort({ createdAt: -1 });
+    if (!otpRecord || otpRecord.expiresAt.getTime() < Date.now()) {
+      return res.status(400).json({ message: 'OTP expired. Please request a new code.' });
+    }
+
+    if (otpRecord.attempts >= 5) {
+      await EmailOtp.deleteMany({ email: normalizedEmail });
+      return res.status(429).json({ message: 'Too many wrong attempts. Please request a new OTP.' });
+    }
+
+    const isMatch = await bcrypt.compare(otp, otpRecord.otpHash);
+    if (!isMatch) {
+      otpRecord.attempts += 1;
+      await otpRecord.save();
+      return res.status(400).json({ message: 'Invalid OTP. Please check the code and try again.' });
+    }
+
+    await EmailOtp.deleteMany({ email: normalizedEmail });
+    res.json({
+      message: 'Email verified successfully.',
+      signupOtpToken: createSignupOtpToken(normalizedEmail),
+    });
+  } catch (err) {
+    console.error('Signup OTP verify error:', err);
+    res.status(500).json({ message: 'Failed to verify OTP. Please try again.' });
+  }
+});
+
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -1443,29 +1732,39 @@ app.post('/api/auth/firebase', async (req, res) => {
     const decodedToken = await firebaseAuth.verifyIdToken(idToken);
     const normalizedEmail = String(decodedToken.email || '').trim().toLowerCase();
     const provider = decodedToken.firebase?.sign_in_provider === 'google.com' ? 'google' : 'firebase';
+    const signupOtpToken = String(req.body.signupOtpToken || '').trim();
+    const hasSignupOtp = verifySignupOtpToken(signupOtpToken, normalizedEmail);
+    const requestedPassword = String(req.body.password || '').trim();
 
     if (!normalizedEmail) {
       return res.status(400).json({ message: 'Firebase account email is required' });
     }
 
-    if (provider !== 'google' && decodedToken.email_verified !== true) {
-      return res.status(403).json({ message: 'Please verify your email before signing in' });
+    if (requestedPassword && requestedPassword.length < 6) {
+      return res.status(400).json({ message: 'Password should be at least 6 characters.' });
     }
 
     let user = await User.findOne({ email: normalizedEmail });
+    const existingOtpVerified = Boolean(user?.emailVerified);
+
+    if (provider !== 'google' && decodedToken.email_verified !== true && !hasSignupOtp && !existingOtpVerified) {
+      return res.status(403).json({ message: 'Please verify your email before signing in' });
+    }
+
     if (!user) {
       const salt = await bcrypt.genSalt(10);
-      const randomPassword = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), salt);
+      const fallbackPassword = crypto.randomBytes(32).toString('hex');
+      const passwordToStore = requestedPassword || fallbackPassword;
       user = new User({
         name: String(req.body.name || decodedToken.name || normalizedEmail.split('@')[0]).trim(),
         phone: String(req.body.phone || '').trim(),
         email: normalizedEmail,
-        password: randomPassword,
+        password: await bcrypt.hash(passwordToStore, salt),
         role: req.body.role === 'workfit' ? 'workfit' : 'livefit',
         focusAreas: [],
         firebaseUid: decodedToken.uid,
         authProvider: provider,
-        emailVerified: Boolean(decodedToken.email_verified),
+        emailVerified: Boolean(decodedToken.email_verified || hasSignupOtp || provider === 'google'),
       });
       await user.save();
       await sendRegistrationConfirmationEmail({
@@ -1477,12 +1776,15 @@ app.post('/api/auth/firebase', async (req, res) => {
     } else {
       user.firebaseUid = user.firebaseUid || decodedToken.uid;
       user.authProvider = provider;
-      user.emailVerified = Boolean(decodedToken.email_verified);
+      user.emailVerified = Boolean(user.emailVerified || decodedToken.email_verified || hasSignupOtp || provider === 'google');
       if (!user.name && (req.body.name || decodedToken.name)) {
         user.name = String(req.body.name || decodedToken.name).trim();
       }
-      if (!user.phone && req.body.phone) {
+      if (req.body.phone) {
         user.phone = String(req.body.phone).trim();
+      }
+      if (requestedPassword) {
+        user.password = await bcrypt.hash(requestedPassword, await bcrypt.genSalt(10));
       }
       await user.save();
     }
@@ -1515,6 +1817,15 @@ app.post('/api/auth/change-password', async (req, res) => {
     const isSamePassword = await bcrypt.compare(newPassword, user.password);
     if (isSamePassword) {
       return res.status(400).json({ message: 'New password must be different from your current password' });
+    }
+
+    if (firebaseAuth && user.firebaseUid) {
+      try {
+        await firebaseAuth.updateUser(user.firebaseUid, { password: newPassword });
+      } catch (firebaseErr) {
+        console.error('Firebase password update error:', firebaseErr.message);
+        return res.status(500).json({ message: 'Unable to update password in Firebase. Please try again.' });
+      }
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -1663,6 +1974,123 @@ app.delete('/api/admin/yoga-programs/:id', async (req, res) => {
   } catch (err) {
     console.error('Error deleting yoga program:', err);
     res.status(err.statusCode || 500).json({ message: err.message || 'Failed to delete yoga program' });
+  }
+});
+
+app.get('/api/yoga-types', async (_req, res) => {
+  try {
+    const types = await YogaType.find({ isActive: true }).sort({ displayOrder: 1, createdAt: 1 });
+    res.json(types.map(sanitizeYogaType));
+  } catch (err) {
+    console.error('Error fetching yoga types:', err);
+    res.status(500).json({ message: 'Failed to fetch yoga types' });
+  }
+});
+
+app.get('/api/admin/yoga-types', async (req, res) => {
+  try {
+    requireAdminAccess(req);
+    const types = await YogaType.find().sort({ displayOrder: 1, createdAt: 1 });
+    res.json(types.map(sanitizeYogaType));
+  } catch (err) {
+    console.error('Error fetching admin yoga types:', err);
+    res.status(err.statusCode || 500).json({ message: err.message || 'Failed to fetch yoga types' });
+  }
+});
+
+app.post('/api/admin/yoga-types', upload.single('image'), async (req, res) => {
+  let uploadedImage = '';
+  try {
+    requireAdminAccess(req);
+    uploadedImage = await convertUploadToWebp(req.file, 'yoga-type');
+    const payload = normalizeYogaTypePayload(req.body, uploadedImage);
+
+    if (!payload.title || !payload.tagline || !payload.desc || !payload.overview || !payload.details || !payload.image) {
+      if (uploadedImage) {
+        removeUploadedFile(uploadedImage);
+      }
+
+      return res.status(400).json({
+        message: 'Title, tagline, short description, overview, details, and image are required',
+      });
+    }
+
+    const yogaType = await YogaType.create(payload);
+    res.status(201).json({ message: 'Yoga type created successfully', data: sanitizeYogaType(yogaType) });
+  } catch (err) {
+    if (uploadedImage) {
+      removeUploadedFile(uploadedImage);
+    }
+
+    console.error('Error creating yoga type:', err);
+    res.status(500).json({ message: err.code === 11000 ? 'Yoga type title already exists' : 'Failed to create yoga type' });
+  }
+});
+
+app.put('/api/admin/yoga-types/:id', upload.single('image'), async (req, res) => {
+  let uploadedImage = '';
+  try {
+    requireAdminAccess(req);
+    const existingType = await YogaType.findById(req.params.id);
+
+    if (!existingType) {
+      if (uploadedImage) {
+        removeUploadedFile(uploadedImage);
+      }
+
+      return res.status(404).json({ message: 'Yoga type not found' });
+    }
+
+    uploadedImage = await convertUploadToWebp(req.file, 'yoga-type');
+    const payload = normalizeYogaTypePayload(req.body, uploadedImage);
+    const updatedPayload = {
+      ...payload,
+      image: payload.image || existingType.image,
+    };
+
+    if (!updatedPayload.title || !updatedPayload.tagline || !updatedPayload.desc || !updatedPayload.overview || !updatedPayload.details || !updatedPayload.image) {
+      if (uploadedImage) {
+        removeUploadedFile(uploadedImage);
+      }
+
+      return res.status(400).json({
+        message: 'Title, tagline, short description, overview, details, and image are required',
+      });
+    }
+
+    const previousImage = existingType.image;
+    Object.assign(existingType, updatedPayload);
+    await existingType.save();
+
+    if (uploadedImage && previousImage !== existingType.image) {
+      removeUploadedFile(previousImage);
+    }
+
+    res.json({ message: 'Yoga type updated successfully', data: sanitizeYogaType(existingType) });
+  } catch (err) {
+    if (uploadedImage) {
+      removeUploadedFile(uploadedImage);
+    }
+
+    console.error('Error updating yoga type:', err);
+    res.status(500).json({ message: err.code === 11000 ? 'Yoga type title already exists' : 'Failed to update yoga type' });
+  }
+});
+
+app.delete('/api/admin/yoga-types/:id', async (req, res) => {
+  try {
+    requireAdminAccess(req);
+    const existingType = await YogaType.findByIdAndDelete(req.params.id);
+
+    if (!existingType) {
+      return res.status(404).json({ message: 'Yoga type not found' });
+    }
+
+    removeUploadedFile(existingType.image);
+    res.json({ message: 'Yoga type deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting yoga type:', err);
+    res.status(err.statusCode || 500).json({ message: err.message || 'Failed to delete yoga type' });
   }
 });
 
@@ -2004,7 +2432,12 @@ app.delete('/api/admin/playlists/:id', async (req, res) => {
 
 app.get('/api/gallery', async (_req, res) => {
   try {
-    const images = await GalleryImage.find({ isActive: true }).sort({ displayOrder: 1, createdAt: -1 });
+    const category = String(_req.query.category || '').trim();
+    const filter = { isActive: true };
+    if (category && category !== 'All') {
+      filter.category = category;
+    }
+    const images = await GalleryImage.find(filter).sort({ category: 1, displayOrder: 1, createdAt: -1 });
     res.json(images.map(sanitizeGalleryImage));
   } catch (err) {
     console.error('Error fetching gallery images:', err);
@@ -2207,6 +2640,21 @@ app.delete('/api/admin/users/:id', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    if (firebaseAuth) {
+      try {
+        if (existingUser.firebaseUid) {
+          await firebaseAuth.deleteUser(existingUser.firebaseUid);
+        } else if (existingUser.email) {
+          const firebaseRecord = await firebaseAuth.getUserByEmail(String(existingUser.email).trim().toLowerCase());
+          if (firebaseRecord?.uid) {
+            await firebaseAuth.deleteUser(firebaseRecord.uid);
+          }
+        }
+      } catch (firebaseErr) {
+        console.error('Firebase auth delete warning:', firebaseErr.message);
+      }
+    }
+
     res.json({ message: 'User deleted successfully' });
   } catch (err) {
     console.error('Error deleting user:', err);
@@ -2392,6 +2840,7 @@ app.get('/api/chat/thread', async (req, res) => {
       name: req.query.name,
       email: req.query.email,
       phone: req.query.phone,
+      guestIp: user?._id ? '' : getRequestIp(req),
     });
 
     await thread.save();
@@ -2415,6 +2864,7 @@ app.post('/api/chat/messages', async (req, res) => {
       name: req.body.name,
       email: req.body.email,
       phone: req.body.phone,
+      guestIp: user?._id ? '' : getRequestIp(req),
     });
 
     const isFirstUserMessage = thread.messages.length === 0;
@@ -2481,6 +2931,22 @@ app.post('/api/admin/chats/:id/messages', async (req, res) => {
   } catch (err) {
     console.error('Error replying to chat:', err);
     res.status(err.statusCode || 500).json({ message: err.message || 'Failed to reply to chat' });
+  }
+});
+
+app.delete('/api/admin/chats/:id', async (req, res) => {
+  try {
+    requireAdminAccess(req);
+    const thread = await ChatThread.findByIdAndDelete(req.params.id);
+
+    if (!thread) {
+      return res.status(404).json({ message: 'Chat not found' });
+    }
+
+    res.json({ message: 'Chat deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting chat:', err);
+    res.status(err.statusCode || 500).json({ message: err.message || 'Failed to delete chat' });
   }
 });
 
@@ -2870,6 +3336,11 @@ app.get('/api/content/:page', async (req, res) => {
         defaultData = yogaProgramsSection;
       } else if (page === 'yoga-challenges-section') {
         defaultData = yogaChallengesSection;
+      } else if (page === 'site-settings') {
+        defaultData = {
+          livefitPhone: '+91 9890008742',
+          workfitPhone: '+1 9256602776',
+        };
       } else {
         defaultData = {
           title: 'Dynamic Page',

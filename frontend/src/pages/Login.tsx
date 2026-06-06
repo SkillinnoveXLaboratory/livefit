@@ -3,9 +3,8 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Eye, EyeOff, Lock, Mail, UserPlus } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FirebaseError } from 'firebase/app';
-import { sendEmailVerification } from 'firebase/auth';
 import { getSafeRedirectPath } from '../config/auth';
-import { signInFirebaseUser, signInWithGoogle, signOutFirebaseUser } from '../lib/firebase';
+import { signInFirebaseUser, signInWithGoogle } from '../lib/firebase';
 import { clearPendingSignupProfile, getPendingSignupProfile, syncFirebaseSession } from '../lib/firebaseSession';
 
 const Login = () => {
@@ -28,6 +27,11 @@ const Login = () => {
       return err.message;
     }
 
+    if (typeof err === 'object' && err && 'response' in err) {
+      const response = (err as { response?: { data?: { message?: string } } }).response;
+      if (response?.data?.message) return response.data.message;
+    }
+
     return err instanceof Error ? err.message : 'Invalid email or password';
   };
 
@@ -39,13 +43,6 @@ const Login = () => {
 
     try {
       const firebaseUser = await signInFirebaseUser(formData.email.trim(), formData.password);
-      if (!firebaseUser.emailVerified) {
-        await sendEmailVerification(firebaseUser);
-        await signOutFirebaseUser();
-        setNotice('Verification email sent again. Please verify your email before signing in.');
-        return;
-      }
-
       const pendingProfile = getPendingSignupProfile(formData.email);
       const auth = await syncFirebaseSession(firebaseUser, {
         role: pendingProfile?.role || signupRole,

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
 import {
   Menu, X, Sparkles, ChevronRight, ArrowRight, Flower2, Activity, Apple,
@@ -45,8 +45,8 @@ const challengeRevealContainer = {
   hidden: {},
   show: {
     transition: {
-      staggerChildren: 0.12,
-      delayChildren: 0.08,
+      staggerChildren: 0.07,
+      delayChildren: 0.04,
     },
   },
 };
@@ -56,7 +56,7 @@ const challengeRevealUp = {
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.85, ease: [0.23, 1, 0.32, 1] },
+    transition: { duration: 0.5, ease: 'easeOut' },
   },
 };
 
@@ -65,7 +65,7 @@ const challengeRevealLeft = {
   show: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.85, ease: [0.23, 1, 0.32, 1] },
+    transition: { duration: 0.5, ease: 'easeOut' },
   },
 };
 
@@ -74,7 +74,7 @@ const challengeRevealRight = {
   show: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.95, ease: [0.23, 1, 0.32, 1] },
+    transition: { duration: 0.5, ease: 'easeOut' },
   },
 };
 
@@ -84,7 +84,7 @@ const challengeCardReveal = (delay = 0) => ({
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { duration: 0.85, delay, ease: [0.23, 1, 0.32, 1] },
+    transition: { duration: 0.48, delay, ease: 'easeOut' },
   },
 });
 
@@ -212,7 +212,7 @@ const workfitWorksReveal = {
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 1.1, ease: [0.23, 1, 0.32, 1] },
+    transition: { duration: 0.58, ease: 'easeOut' },
   },
 };
 
@@ -245,6 +245,8 @@ const stackCards = [
     image: '/images/ws1.webp',
     badge: null,
     checklist: ['Fitness & workout guidance', 'Healthy habit coaching', 'Weight management support', 'Stress & energy management', 'Lifestyle optimization', 'Personalized wellness journeys'],
+    detailBlocks: [],
+    visualTags: [],
     footerTitle: 'Personalized Wellness',
     footerText: 'That Creates Lasting Change',
     visual: 'dashboard',
@@ -256,7 +258,9 @@ const stackCards = [
     accent: 'blue',
     image: '/images/ws2.webp',
     badge: 'BUILT FOR ALL FITNESS LEVELS',
-    checklist: ['Step competitions', 'Yoga & fitness challenges', 'Meditation journeys', 'Sleep better programs', 'Healthy eating challenges', 'Fat burn & movement challenges', 'Running & jogging initiatives'],
+    checklist: ['Step competitions', 'Yoga & fitness challenges', 'Meditation journeys', 'Sleep better programs', 'Healthy eating challenges', 'Fat burn & movement programs', 'Running & jogging initiatives'],
+    detailBlocks: [],
+    visualTags: ['Yoga', 'Running'],
     footerTitle: 'Turn Healthy Habits',
     footerText: 'Into Team Culture',
     visual: 'leaderboard',
@@ -268,22 +272,46 @@ const stackCards = [
     accent: 'green',
     image: '/images/hw1.webp',
     badge: null,
-    checklist: ['Guided mindfulness sessions', 'Breathing routines', 'Sleep recovery support', 'Mental wellness resources'],
+    checklist: [],
+    detailBlocks: [
+      { title: 'Guided Mindfulness Sessions', text: 'Structured mindfulness and meditation that reduce stress, improve focus, and build emotional balance.' },
+      { title: 'Mental Wellness Resources', text: 'Expert webinars, recovery guidance, sleep audio, and dynamic wellness libraries at your fingertips.' },
+    ],
+    visualTags: ['Mindfulness'],
     footerTitle: 'Calmer Minds.',
     footerText: 'Stronger Performance.',
     visual: 'breathing',
   },
   {
     number: '04',
-    title: 'Flexible Learning',
-    subtitle: 'Flexible and on-demand content that fits both remote and in-person work schedules.',
+    title: 'On-Site & Remote',
+    subtitle: 'Flexible wellness experiences designed for both in-office and remote teams across all schedules.',
     accent: 'green',
     image: '/images/hw2.webp',
-    badge: 'ON-DEMAND',
-    checklist: ['Self-paced courses', 'Skill-building workshops', 'Digital learning library', 'Mobile-first accessibility', 'Personal growth paths'],
-    footerTitle: 'Always Connected.',
-    footerText: 'Smarter Learning.',
-    visual: 'modules',
+    badge: 'TEAM WELLNESS',
+    checklist: [],
+    detailBlocks: [
+      { title: 'Flexible Scheduling', text: 'Wellness that fits every schedule, time zone and work style without disrupting core company productivity.' },
+      { title: 'Virtual Group Activities', text: 'Live yoga, movement breaks, fitness sessions, breathwork workshops and interactive hybrid events.' },
+    ],
+    visualTags: ['Team Wellness'],
+    footerTitle: 'Wellness Anywhere',
+    footerText: 'Your Team Works.',
+    visual: 'schedule',
+  },
+  {
+    number: '05',
+    title: 'Make Breaks Effective',
+    subtitle: 'Transform short workplace breaks into powerful moments of recovery and mental reset.',
+    accent: 'orange',
+    image: '/images/hw3.webp',
+    badge: '5 MIN RESET',
+    checklist: ['Mobility breaks', 'Desk yoga', 'Deep breathing', 'Shoulder relief', 'Lower back recovery', 'Midday energy'],
+    detailBlocks: [],
+    visualTags: ['Neck Stretch'],
+    footerTitle: 'Small Breaks.',
+    footerText: 'Big Impact.',
+    visual: 'reset',
   },
 ];
 
@@ -322,11 +350,11 @@ const WorkfitStackSolutions = () => {
               className={`wellness-card card-${index + 1} accent-${card.accent} ${getCardState(index)}`}
               onClick={() => setActiveIndex(index)}
             >
-              {card.badge && <div className="stack-badge">{card.badge}</div>}
               <div className="number-title">
                 <span className="card-number">{card.number}</span>
                 <span>{card.title}</span>
               </div>
+              {card.badge && <div className="stack-badge">{card.badge}</div>}
               <p className="subtitle">{card.subtitle}</p>
 
               <div className="visual-container">
@@ -361,14 +389,46 @@ const WorkfitStackSolutions = () => {
                     <div className="breathing-icons"><div className="breathing-wave" /><div className="play-icon">||</div></div>
                   </div>
                 )}
-                {card.visual === 'modules' && <div className="learning-modules overlaid-component">Learning Modules</div>}
+                {card.visual === 'schedule' && (
+                  <div className="team-schedule overlaid-component">
+                    <strong>Flexible Scheduling</strong>
+                    <span>Office + Remote</span>
+                    <span>Every time zone</span>
+                  </div>
+                )}
+                {card.visual === 'reset' && (
+                  <div className="reset-routine overlaid-component">
+                    <strong>Neck Stretch</strong>
+                    {['Neck Stretch', 'Shoulder Roll', 'Deep Breathing', 'Back Release'].map((step, stepIndex) => (
+                      <span key={step}><b>{stepIndex + 1}</b>{step}</span>
+                    ))}
+                  </div>
+                )}
+                {card.visualTags.length > 0 && (
+                  <div className="stack-visual-tags">
+                    {card.visualTags.map((tag) => <span key={tag}>{tag}</span>)}
+                  </div>
+                )}
               </div>
 
-              <ul className="check-list">
-                {card.checklist.map((item) => (
-                  <li key={item}><CheckCircle2 className="check-icon" size={16} /> {item}</li>
-                ))}
-              </ul>
+              {card.checklist.length > 0 && (
+                <ul className="check-list">
+                  {card.checklist.map((item) => (
+                    <li key={item}><CheckCircle2 className="check-icon" size={16} /> {item}</li>
+                  ))}
+                </ul>
+              )}
+
+              {card.detailBlocks.length > 0 && (
+                <div className="stack-detail-blocks">
+                  {card.detailBlocks.map((detail) => (
+                    <div key={detail.title}>
+                      <strong>{detail.title}</strong>
+                      <p>{detail.text}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div className="card-footer">
                 <ShieldCheck className="footer-shield" size={18} />
@@ -445,14 +505,14 @@ const WorkFit = () => {
   };
 
   const workfitTestimonials = [
-    { name: "Mahesh", title: "Founder & CEO", company: "", country: "🇺🇸 USA", text: "WorkFit has transformed the way our team feels and performs. The sessions are practical, engaging, and easy to integrate into our busy workday.", tags: ["Energy", "Focus", "Team Wellness"] },
-    { name: "Shrikant", title: "Founder & CTO", company: "", country: "🇺🇸 USA", text: "The blend of yoga, mobility, and mindfulness is exceptional. We've seen more energy, better concentration, and stronger teamwork.", tags: ["Performance", "Mindfulness", "Teamwork"] },
-    { name: "Amita", title: "Project Coordinator", company: "", country: "🇬🇧 UK", text: "We just had one class with WorkFit and the experience was outstanding! Our team loved it and felt an immediate sense of relaxation and positivity. We're excited to continue this journey.", tags: ["First Class Experience", "Relaxation", "Excited"] },
-    { name: "Prasad", title: "Founder & MD", company: "", country: "🇮🇳 India", text: "WorkFit's approach is holistic and very impactful. Our employees are more consistent, less stressed, and more productive.", tags: ["Holistic Wellness", "Stress Relief", "Productivity"] },
-    { name: "Madhu", title: "Co-founder", company: "", country: "🇺🇸 USA", text: "The flexibility and variety of programs make it easy for everyone to participate. Our team looks forward to every session!", tags: ["Engagement", "Flexibility", "Well-being"] },
-    { name: "Emma", title: "Professor", company: "", country: "🇬🇧 UK", text: "Just one session with WorkFit and I felt refreshed and re-energized. Practical, well-guided, and perfect for busy professional life!", tags: ["Refreshment", "Energy", "Wellness"] },
-    { name: "Bekir Orahan", title: "Professor", company: "", country: "🇹🇷 Turkey", text: "The session was practical, refreshing, and eye-opening. It gave us simple tools for better health, focus, and mental clarity.", tags: ["Mental Clarity", "Focus", "Practical Tools"] },
-    { name: "Michael Johnson", title: "Director - People & Culture", company: "", country: "🇺🇸 USA", text: "WorkFit is a game-changer for our workplace. We've noticed less stress, better focus, and a happier team.", tags: ["Stress Reduction", "Focus", "Happiness"] }
+    { name: "Mahesh", title: "Founder & CEO", company: "", country: "USA", text: "WorkFit has transformed the way our team feels and performs. The sessions are practical, engaging, and easy to integrate into our busy workday.", tags: ["Energy", "Focus", "Team Wellness"] },
+    { name: "Shrikant", title: "Founder & CTO", company: "", country: "USA", text: "The blend of yoga, mobility, and mindfulness is exceptional. We've seen more energy, better concentration, and stronger teamwork.", tags: ["Performance", "Mindfulness", "Teamwork"] },
+    { name: "Amita", title: "Project Coordinator", company: "", country: "UK", text: "We just had one class with WorkFit and the experience was outstanding! Our team loved it and felt an immediate sense of relaxation and positivity. We're excited to continue this journey.", tags: ["First Class Experience", "Relaxation", "Excited"] },
+    { name: "Prasad", title: "Founder & MD", company: "", country: "India", text: "WorkFit's approach is holistic and very impactful. Our employees are more consistent, less stressed, and more productive.", tags: ["Holistic Wellness", "Stress Relief", "Productivity"] },
+    { name: "Madhu", title: "Co-founder", company: "", country: "USA", text: "The flexibility and variety of programs make it easy for everyone to participate. Our team looks forward to every session!", tags: ["Engagement", "Flexibility", "Well-being"] },
+    { name: "Emma", title: "Professor", company: "", country: "UK", text: "Just one session with WorkFit and I felt refreshed and re-energized. Practical, well-guided, and perfect for busy professional life!", tags: ["Refreshment", "Energy", "Wellness"] },
+    { name: "Bekir Orahan", title: "Professor", company: "", country: "Turkey", text: "The session was practical, refreshing, and eye-opening. It gave us simple tools for better health, focus, and mental clarity.", tags: ["Mental Clarity", "Focus", "Practical Tools"] },
+    { name: "Michael Johnson", title: "Director - People & Culture", company: "", country: "USA", text: "WorkFit is a game-changer for our workplace. We've noticed less stress, better focus, and a happier team.", tags: ["Stress Reduction", "Focus", "Happiness"] }
   ];
 
   const slides = [
@@ -570,13 +630,37 @@ const WorkFit = () => {
       tagline: 'Healthy people. Positive culture. Better performance.'
     }
   ];
-  const heroSlides = slides.slice(0, 1);
+  const heroSlides = slides.slice(0, 5).map((slide) => ({
+    ...slides[0],
+    image: slide.image,
+  }));
+  const heroContent = heroSlides[0] ?? heroSlides[currentSlide];
+  const activeHeroSlide = heroSlides[currentSlide] ?? heroContent;
+    const countryFlagMap: Record<string, string> = {
+    USA: '\uD83C\uDDFA\uD83C\uDDF8',
+    UK: '\uD83C\uDDEC\uD83C\uDDE7',
+    India: '\uD83C\uDDEE\uD83C\uDDF3',
+    Turkey: '\uD83C\uDDF9\uD83C\uDDF7',
+    Germany: '\uD83C\uDDE9\uD83C\uDDEA',
+    France: '\uD83C\uDDEB\uD83C\uDDF7',
+    Canada: '\uD83C\uDDE8\uD83C\uDDE6',
+    Australia: '\uD83C\uDDE6\uD83C\uDDFA',
+    Japan: '\uD83C\uDDEF\uD83C\uDDF5',
+    Singapore: '\uD83C\uDDF8\uD83C\uDDEC',
+  };
+  const formatCountryBadge = (country?: string) => {
+    const cleaned = (country || '').replace(/^\?+\s*/, '').trim();
+    if (!cleaned) return '';
+    const [name] = cleaned.split(/\s+/);
+    const flag = countryFlagMap[name] || countryFlagMap[cleaned] || '';
+    return flag ? `${flag} ${cleaned}` : cleaned;
+  };
 
   useEffect(() => {
     if (heroSlides.length <= 1) return undefined;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 6000);
+    }, 3000);
     return () => clearInterval(timer);
   }, [heroSlides.length]);
 
@@ -633,12 +717,12 @@ const WorkFit = () => {
           <AnimatePresence initial={false}>
             <motion.img
               key={currentSlide}
-              src={heroSlides[currentSlide].image}
-              initial={{ opacity: 0, scale: 1.04 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.01 }}
-              transition={{ duration: 1.05, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute inset-0 h-full w-full object-cover object-[center_top] opacity-25 blur-[1px] scale-105"
+              src={activeHeroSlide.image}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.7, ease: 'easeOut' }}
+              className="absolute inset-0 h-full w-full object-cover object-[center_top] opacity-25 blur-[1px]"
               alt="WorkFit Background"
             />
           </AnimatePresence>
@@ -653,259 +737,244 @@ const WorkFit = () => {
           <div className="grid h-full grid-cols-1 items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="relative max-w-2xl text-left rounded-[2.5rem] border border-white/10 bg-white/[0.07] p-6 shadow-[0_30px_100px_rgba(0,0,0,0.28)] backdrop-blur-xl md:p-9 lg:h-[650px] lg:overflow-y-auto lg:p-10">
             <div className="absolute -left-3 top-10 hidden h-24 w-1 rounded-full bg-gradient-to-b from-orange-400 to-amber-300 lg:block" />
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentSlide}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-              >
-                {/* Icon Badge */}
-                {heroSlides[currentSlide].iconBadge && (
-                  <div className={`w-16 h-16 rounded-full ${heroSlides[currentSlide].iconColor || 'bg-[#f97316]'} flex items-center justify-center mb-6 shadow-lg`}>
-                    {heroSlides[currentSlide].IconComponent ? (
-                      React.createElement(heroSlides[currentSlide].IconComponent, { className: "w-8 h-8 text-white" })
-                    ) : (
-                      <Flower2 className="w-8 h-8 text-white" />
-                    )}
-                  </div>
-                )}
-
-                {/* Badge */}
-                {heroSlides[currentSlide].badge && (
-                  heroSlides[currentSlide].badgeStyle === 'text' ? (
-                    <div className="mb-5 inline-flex rounded-full border border-orange-300/25 bg-orange-400/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-orange-200 md:text-xs">
-                      {heroSlides[currentSlide].badge}
-                    </div>
-                  ) : heroSlides[currentSlide].badgeStyle === 'number' ? (
-                    <div className={`${heroSlides[currentSlide].badgeColor || 'text-[#f97316]'} font-bold text-2xl md:text-3xl mb-2`}>
-                      {heroSlides[currentSlide].badge}
-                    </div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.65, ease: "easeOut" }}
+            >
+              {heroContent.iconBadge && (
+                <div className={`w-16 h-16 rounded-full ${heroContent.iconColor || 'bg-[#f97316]'} flex items-center justify-center mb-6 shadow-lg`}>
+                  {heroContent.IconComponent ? (
+                    React.createElement(heroContent.IconComponent, { className: "w-8 h-8 text-white" })
                   ) : (
-                    <div className="inline-block px-4 py-1.5 border border-orange-200 rounded-full bg-orange-50 text-orange-600 font-bold text-[10px] md:text-xs tracking-[0.1em] mb-6 shadow-sm">
-                      {heroSlides[currentSlide].badge}
-                    </div>
-                  )
-                )}
+                    <Flower2 className="w-8 h-8 text-white" />
+                  )}
+                </div>
+              )}
 
-                {/* Title */}
-                {heroSlides[currentSlide].titleChunks ? (
-                  <h1 className="mb-6 text-5xl font-black leading-[1.02] tracking-[-0.06em] text-white sm:text-6xl md:text-7xl">
-                    {heroSlides[currentSlide].titleChunks.map((chunk: any, idx: number) => (
-                      <span key={idx} className="block">
-                        {chunk.text && <span>{chunk.text}</span>}
-                        {chunk.orange && <span className="text-[#f97316]">{chunk.orange}</span>}
-                        {chunk.dark && <span>{chunk.dark}</span>}
-                      </span>
-                    ))}
-                  </h1>
+              {heroContent.badge && (
+                heroContent.badgeStyle === 'text' ? (
+                  <div className="mb-5 inline-flex rounded-full border border-orange-300/25 bg-orange-400/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.22em] text-orange-200 md:text-xs">
+                    {heroContent.badge}
+                  </div>
+                ) : heroContent.badgeStyle === 'number' ? (
+                  <div className={`${heroContent.badgeColor || 'text-[#f97316]'} font-bold text-2xl md:text-3xl mb-2`}>
+                    {heroContent.badge}
+                  </div>
                 ) : (
-                  <h1 className="mb-5 text-4xl font-black leading-[1.05] tracking-[-0.05em] text-white sm:text-5xl md:text-6xl">
-                    {heroSlides[currentSlide].title?.map((line: string, idx: number) => (
-                      <span key={idx} className={`block ${heroSlides[currentSlide].orangeTitleIndex === idx ? 'text-[#f97316]' : ''}`}>
-                        {line}
+                  <div className="inline-block px-4 py-1.5 border border-orange-200 rounded-full bg-orange-50 text-orange-600 font-bold text-[10px] md:text-xs tracking-[0.1em] mb-6 shadow-sm">
+                    {heroContent.badge}
+                  </div>
+                )
+              )}
+
+              {heroContent.titleChunks ? (
+                <h1 className="mb-6 text-5xl font-black leading-[1.02] tracking-[-0.06em] text-white sm:text-6xl md:text-7xl">
+                  {heroContent.titleChunks.map((chunk: any, idx: number) => (
+                    <span key={idx} className="block">
+                      {chunk.text && <span>{chunk.text}</span>}
+                      {chunk.orange && <span className="text-[#f97316]">{chunk.orange}</span>}
+                      {chunk.dark && <span>{chunk.dark}</span>}
+                    </span>
+                  ))}
+                </h1>
+              ) : (
+                <h1 className="mb-5 text-4xl font-black leading-[1.05] tracking-[-0.05em] text-white sm:text-5xl md:text-6xl">
+                  {heroContent.title?.map((line: string, idx: number) => (
+                    <span key={idx} className={`block ${heroContent.orangeTitleIndex === idx ? 'text-[#f97316]' : ''}`}>
+                      {line}
+                    </span>
+                  ))}
+                </h1>
+              )}
+
+              {heroContent.subtitle && (
+                <p className="mb-6 text-xl font-semibold leading-relaxed text-orange-200 md:text-2xl">
+                  {heroContent.subtitle}
+                </p>
+              )}
+
+              {heroContent.description && (
+                <p className="mb-8 max-w-xl text-base font-medium leading-relaxed text-slate-200/80 md:text-lg">
+                  {heroContent.description}
+                </p>
+              )}
+
+              {heroContent.bullets && (
+                <div className="space-y-3 mb-10">
+                  {heroContent.bullets.map((bullet, idx) => (
+                    <div key={idx} className="flex items-center gap-3">
+                      <div className="flex-shrink-0 w-5 h-5 rounded-full border border-orange-300/40 flex items-center justify-center bg-orange-400/10">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-orange-500" />
+                      </div>
+                      <span className="text-white/90 font-medium md:text-lg">{bullet}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {heroContent.features && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 mb-10">
+                  {heroContent.features.map((feature, idx) => (
+                    <div key={idx} className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shadow-sm">
+                        <feature.icon className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <span className="text-sm md:text-base font-semibold text-white/90 whitespace-nowrap">
+                        {feature.text}
                       </span>
-                    ))}
-                  </h1>
-                )}
+                    </div>
+                  ))}
+                </div>
+              )}
 
-                {/* Subtitle / Description */}
-                {heroSlides[currentSlide].subtitle && (
-                  <p className="mb-6 text-xl font-semibold leading-relaxed text-orange-200 md:text-2xl">
-                    {heroSlides[currentSlide].subtitle}
-                  </p>
-                )}
-
-                {heroSlides[currentSlide].description && (
-                  <p className="mb-8 max-w-xl text-base font-medium leading-relaxed text-slate-200/80 md:text-lg">
-                    {heroSlides[currentSlide].description}
-                  </p>
-                )}
-
-                {/* Bullets (Checklist) */}
-                {heroSlides[currentSlide].bullets && (
-                  <div className="space-y-3 mb-10">
-                    {heroSlides[currentSlide].bullets.map((bullet, idx) => (
-                      <div key={idx} className="flex items-center gap-3">
-                        <div className="flex-shrink-0 w-5 h-5 rounded-full border border-orange-300/40 flex items-center justify-center bg-orange-400/10">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-orange-500" />
+              {(heroContent as any).listFeatures && (() => {
+                const accent = (heroContent as any).listAccent || '#3b82f6';
+                return (
+                  <div className="space-y-4 mb-6">
+                    {(heroContent as any).listFeatures.map((f: any, idx: number) => (
+                      <div key={idx} className="flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: 'transparent', border: `1px solid ${accent}` }}>
+                          <f.icon className="w-5 h-5" style={{ color: accent }} />
                         </div>
-                        <span className="text-white/90 font-medium md:text-lg">{bullet}</span>
+                        <div>
+                          <div className="font-bold text-white text-sm md:text-base">{f.title}</div>
+                          <div className="text-sm text-gray-400 leading-snug whitespace-pre-line">{f.desc}</div>
+                        </div>
                       </div>
                     ))}
                   </div>
-                )}
+                );
+              })()}
 
-                {/* Features row */}
-                {heroSlides[currentSlide].features && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 mb-10">
-                    {heroSlides[currentSlide].features.map((feature, idx) => (
-                      <div key={idx} className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shadow-sm">
-                          <feature.icon className="w-5 h-5 text-orange-600" />
+              {(heroContent as any).multiSection && (() => {
+                const sections = (heroContent as any).multiSection;
+                const fullSections = sections.filter((s: any) => s.fullWidth);
+                const halfSections = sections.filter((s: any) => !s.fullWidth);
+                const accentColor = (heroContent as any).badgeColor?.match(/\[(.*?)\]/)?.[1] || (heroContent as any).badgeColor?.replace('text-', '') || '#22c55e';
+                const renderItem = (item: any, iIdx: number, small = false) => (
+                  <div key={iIdx} className="flex items-start gap-2.5">
+                    <div className={`${small ? 'w-7 h-7' : 'w-8 h-8'} rounded-full flex items-center justify-center shrink-0 mt-0.5`} style={{ background: 'transparent', border: `1px solid ${accentColor}` }}>
+                      <item.icon style={{ color: accentColor }} className={small ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
+                    </div>
+                    <div>
+                      <div className="font-bold text-white text-xs">{item.title}</div>
+                      <div className="text-xs text-gray-400 leading-snug">{item.desc}</div>
+                    </div>
+                  </div>
+                );
+                return (
+                  <div className="mb-3 space-y-3">
+                    {fullSections.map((section: any, sIdx: number) => (
+                      <div key={sIdx}>
+                        <h4 className="text-white font-bold text-sm mb-2">{section.title}</h4>
+                        <div className="space-y-1.5">
+                          {section.items.map((item: any, iIdx: number) => renderItem(item, iIdx))}
                         </div>
-                        <span className="text-sm md:text-base font-semibold text-white/90 whitespace-nowrap">
-                          {feature.text}
-                        </span>
                       </div>
                     ))}
-                  </div>
-                )}
-
-                {/* List Features (icon + title + desc) */}
-                {(heroSlides[currentSlide] as any).listFeatures && (() => {
-                  const accent = (heroSlides[currentSlide] as any).listAccent || '#3b82f6';
-                  return (
-                    <div className="space-y-4 mb-6">
-                      {(heroSlides[currentSlide] as any).listFeatures.map((f: any, idx: number) => (
-                        <div key={idx} className="flex items-start gap-4">
-                          <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: 'transparent', border: `1px solid ${accent}` }}>
-                            <f.icon className="w-5 h-5" style={{ color: accent }} />
-                          </div>
-                          <div>
-                            <div className="font-bold text-white text-sm md:text-base">{f.title}</div>
-                            <div className="text-sm text-gray-400 leading-snug whitespace-pre-line">{f.desc}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })()}
-
-                {/* Multi-Section (full width then two-column) */}
-                {(heroSlides[currentSlide] as any).multiSection && (() => {
-                  const sections = (heroSlides[currentSlide] as any).multiSection;
-                  const fullSections = sections.filter((s: any) => s.fullWidth);
-                  const halfSections = sections.filter((s: any) => !s.fullWidth);
-                  const accentColor = (heroSlides[currentSlide] as any).badgeColor?.match(/\[(.*?)\]/)?.[1] || (heroSlides[currentSlide] as any).badgeColor?.replace('text-', '') || '#22c55e';
-                  const renderItem = (item: any, iIdx: number, small = false) => (
-                    <div key={iIdx} className="flex items-start gap-2.5">
-                      <div className={`${small ? 'w-7 h-7' : 'w-8 h-8'} rounded-full flex items-center justify-center shrink-0 mt-0.5`} style={{ background: 'transparent', border: `1px solid ${accentColor}` }}>
-                        <item.icon style={{ color: accentColor }} className={small ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
-                      </div>
-                      <div>
-                        <div className="font-bold text-white text-xs">{item.title}</div>
-                        <div className="text-xs text-gray-400 leading-snug">{item.desc}</div>
-                      </div>
-                    </div>
-                  );
-                  return (
-                    <div className="mb-3 space-y-3">
-                      {fullSections.map((section: any, sIdx: number) => (
-                        <div key={sIdx}>
-                          <h4 className="text-white font-bold text-sm mb-2">{section.title}</h4>
-                          <div className="space-y-1.5">
-                            {section.items.map((item: any, iIdx: number) => renderItem(item, iIdx))}
-                          </div>
-                        </div>
-                      ))}
-                      {halfSections.length > 0 && (
-                        <div className="grid grid-cols-2 gap-3">
-                          {halfSections.map((section: any, sIdx: number) => (
-                            <div key={sIdx}>
-                              <h4 className="text-white font-bold text-xs mb-2">{section.title}</h4>
-                              <div className="space-y-1.5">
-                                {section.items.map((item: any, iIdx: number) => renderItem(item, iIdx, true))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
-
-                {/* Simple List Features */}
-                {(heroSlides[currentSlide] as any).simpleListFeatures && (() => {
-                  const accentColor = (heroSlides[currentSlide] as any).badgeColor?.match(/\[(.*?)\]/)?.[1] || (heroSlides[currentSlide] as any).badgeColor?.replace('text-', '') || '#6366f1';
-                  return (
-                    <div className="mb-8 flex flex-col">
-                      {(heroSlides[currentSlide] as any).simpleListFeatures.map((f: any, idx: number, arr: any[]) => (
-                        <div key={idx} className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ border: `1px solid ${accentColor}` }}>
-                            <f.icon className="w-5 h-5" style={{ color: accentColor }} />
-                          </div>
-                          <div className={`flex-1 py-3 ${idx !== arr.length - 1 ? 'border-b border-gray-700/50' : ''}`}>
-                            <div className="text-white text-sm font-medium whitespace-pre-line leading-snug">
-                              {f.text}
+                    {halfSections.length > 0 && (
+                      <div className="grid grid-cols-2 gap-3">
+                        {halfSections.map((section: any, sIdx: number) => (
+                          <div key={sIdx}>
+                            <h4 className="text-white font-bold text-xs mb-2">{section.title}</h4>
+                            <div className="space-y-1.5">
+                              {section.items.map((item: any, iIdx: number) => renderItem(item, iIdx, true))}
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })()}
-
-                {/* Tagline */}
-                {(heroSlides[currentSlide] as any).tagline && (
-                  <p className="text-sm font-semibold mb-6" style={{ color: (heroSlides[currentSlide] as any).badgeColor?.match(/\[(.*?)\]/)?.[1] || (heroSlides[currentSlide] as any).badgeColor?.replace('text-', '') || '#3b82f6' }}>
-                    {(heroSlides[currentSlide] as any).tagline}
-                  </p>
-                )}
-
-                {/* Action Buttons */}
-                {(heroSlides[currentSlide].primaryButtonText || heroSlides[currentSlide].secondaryButtonText) && (
-                  <div className="flex flex-col sm:flex-row items-center gap-5">
-                    {heroSlides[currentSlide].primaryButtonText === 'Book a Demo' ? (
-                      <motion.button 
-                        whileHover={{ scale: 1.05, boxShadow: "0 20px 40px -10px rgba(249, 115, 22, 0.25)" }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => navigate('/workfitinquiry')}
-                        className="group relative flex w-full shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-orange-400 to-amber-300 py-5 pl-16 pr-8 text-xs font-black uppercase tracking-[0.3em] text-slate-950 shadow-[0_22px_55px_rgba(249,115,22,0.28)] transition-all sm:w-auto"
-                      >
-                        <div className="absolute left-2 top-2 bottom-2 aspect-square bg-slate-950 rounded-full flex items-center justify-center transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:left-[calc(100%-3rem)] z-10">
-                          <ChevronRight className="w-5 h-5 text-orange-600" />
-                        </div>
-                        <span className="relative z-10 transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:-translate-x-6">
-                          {heroSlides[currentSlide].primaryButtonText}
-                        </span>
-                      </motion.button>
-                    ) : (
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => navigate('/workfitinquiry')}
-                        className={`group relative overflow-hidden font-bold transition-all flex items-center justify-center gap-2 ${heroSlides[currentSlide].buttonStyle === 'screenshot'
-                            ? 'bg-gradient-to-r from-orange-400 to-amber-300 text-slate-950 rounded-full px-8 py-4 shadow-[0_18px_45px_rgba(249,115,22,0.25)] w-full sm:w-auto text-[15px]'
-                            : heroSlides[currentSlide].buttonStyle === 'outline'
-                              ? 'border border-white/15 text-white bg-white/10 hover:bg-white/15 rounded-full px-8 py-4'
-                              : 'bg-gradient-to-r from-orange-400 to-amber-300 text-slate-950 shadow-xl shadow-orange-950/20 rounded-full px-8 py-4'
-                          }`}
-                      >
-                        {heroSlides[currentSlide].primaryButtonText}
-                        {heroSlides[currentSlide].buttonStyle !== 'screenshot' && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
-                      </motion.button>
-                    )}
-
-                    {heroSlides[currentSlide].secondaryButtonText && (
-                      <motion.button
-                        onClick={() => {
-                          if (heroSlides[currentSlide].secondaryButtonText === 'Explore Solutions') {
-                            navigate('/solutions');
-                          }
-                        }}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className={`font-bold transition-all flex items-center justify-center gap-2 ${heroSlides[currentSlide].buttonStyle === 'screenshot'
-                            ? 'bg-white/10 text-white border border-white/15 rounded-full px-8 py-4 hover:bg-white/15 w-full sm:w-auto text-[15px] backdrop-blur-md'
-                            : 'bg-white/10 text-white border border-white/15 rounded-full px-8 py-4 backdrop-blur-md hover:bg-white/15'
-                          }`}
-                      >
-                        {heroSlides[currentSlide].secondaryButtonText}
-                        {heroSlides[currentSlide].buttonStyle === 'screenshot' && <ArrowRight className="w-4 h-4" />}
-                      </motion.button>
+                        ))}
+                      </div>
                     )}
                   </div>
-                )}
-              </motion.div>
-            </AnimatePresence>
+                );
+              })()}
+
+              {(heroContent as any).simpleListFeatures && (() => {
+                const accentColor = (heroContent as any).badgeColor?.match(/\[(.*?)\]/)?.[1] || (heroContent as any).badgeColor?.replace('text-', '') || '#6366f1';
+                return (
+                  <div className="mb-8 flex flex-col">
+                    {(heroContent as any).simpleListFeatures.map((f: any, idx: number, arr: any[]) => (
+                      <div key={idx} className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style={{ border: `1px solid ${accentColor}` }}>
+                          <f.icon className="w-5 h-5" style={{ color: accentColor }} />
+                        </div>
+                        <div className={`flex-1 py-3 ${idx !== arr.length - 1 ? 'border-b border-gray-700/50' : ''}`}>
+                          <div className="text-white text-sm font-medium whitespace-pre-line leading-snug">
+                            {f.text}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+
+              {(heroContent as any).tagline && (
+                <p className="text-sm font-semibold mb-6" style={{ color: (heroContent as any).badgeColor?.match(/\[(.*?)\]/)?.[1] || (heroContent as any).badgeColor?.replace('text-', '') || '#3b82f6' }}>
+                  {(heroContent as any).tagline}
+                </p>
+              )}
+
+              {(heroContent.primaryButtonText || heroContent.secondaryButtonText) && (
+                <div className="flex flex-col sm:flex-row items-center gap-5">
+                  {heroContent.primaryButtonText === 'Book a Demo' ? (
+                    <motion.button
+                      whileHover={{ scale: 1.05, boxShadow: "0 20px 40px -10px rgba(249, 115, 22, 0.25)" }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => navigate('/workfitinquiry')}
+                      className="group relative flex w-full shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-orange-400 to-amber-300 py-5 pl-16 pr-8 text-xs font-black uppercase tracking-[0.3em] text-slate-950 shadow-[0_22px_55px_rgba(249,115,22,0.28)] transition-all sm:w-auto"
+                    >
+                      <div className="absolute left-2 top-2 bottom-2 aspect-square bg-slate-950 rounded-full flex items-center justify-center transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:left-[calc(100%-3rem)] z-10">
+                        <ChevronRight className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <span className="relative z-10 transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:-translate-x-6">
+                        {heroContent.primaryButtonText}
+                      </span>
+                    </motion.button>
+                  ) : (
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => navigate('/workfitinquiry')}
+                      className={`group relative overflow-hidden font-bold transition-all flex items-center justify-center gap-2 ${heroContent.buttonStyle === 'screenshot'
+                          ? 'bg-gradient-to-r from-orange-400 to-amber-300 text-slate-950 rounded-full px-8 py-4 shadow-[0_18px_45px_rgba(249,115,22,0.25)] w-full sm:w-auto text-[15px]'
+                          : heroContent.buttonStyle === 'outline'
+                            ? 'border border-white/15 text-white bg-white/10 hover:bg-white/15 rounded-full px-8 py-4'
+                            : 'bg-gradient-to-r from-orange-400 to-amber-300 text-slate-950 shadow-xl shadow-orange-950/20 rounded-full px-8 py-4'
+                        }`}
+                    >
+                      {heroContent.primaryButtonText}
+                      {heroContent.buttonStyle !== 'screenshot' && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
+                    </motion.button>
+                  )}
+
+                  {heroContent.secondaryButtonText && (
+                    <motion.button
+                      onClick={() => {
+                        if (heroContent.secondaryButtonText === 'Explore Solutions') {
+                          navigate('/solutions/employee-burnout');
+                        }
+                      }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`font-bold transition-all flex items-center justify-center gap-2 ${heroContent.buttonStyle === 'screenshot'
+                          ? 'bg-white/10 text-white border border-white/15 rounded-full px-8 py-4 hover:bg-white/15 w-full sm:w-auto text-[15px] backdrop-blur-md'
+                          : 'bg-white/10 text-white border border-white/15 rounded-full px-8 py-4 backdrop-blur-md hover:bg-white/15'
+                        }`}
+                    >
+                      {heroContent.secondaryButtonText}
+                      {heroContent.buttonStyle === 'screenshot' && <ArrowRight className="w-4 h-4" />}
+                    </motion.button>
+                  )}
+                </div>
+              )}
+            </motion.div>
           </div>
           <motion.div
             className="relative hidden h-[650px] lg:block"
-            initial={{ opacity: 0, x: 44 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
           >
             <div className="absolute left-10 top-8 h-32 w-32 rounded-full bg-orange-400/20 blur-3xl" />
             <div className="absolute right-2 top-12 h-[34rem] w-[82%] rotate-2 overflow-hidden rounded-[3.5rem] border border-white/12 bg-white/10 p-3 shadow-[0_45px_120px_rgba(0,0,0,0.38)] backdrop-blur-xl">
@@ -913,11 +982,11 @@ const WorkFit = () => {
                 <AnimatePresence initial={false}>
                   <motion.img
                     key={`hero-frame-${currentSlide}`}
-                    src={heroSlides[currentSlide].image}
+                    src={activeHeroSlide.image}
                     initial={{ opacity: 0, scale: 1.08 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 1.02 }}
-                    transition={{ duration: 0.95, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                     className="absolute inset-0 h-full w-full object-cover"
                     alt="WorkFit wellness preview"
                   />
@@ -944,25 +1013,6 @@ const WorkFit = () => {
           </motion.div>
           </div>
         </div>
-
-        {/* Pagination Control */}
-        {heroSlides.length > 1 && <div className="absolute bottom-6 md:bottom-12 right-6 md:right-12 z-30 flex items-center gap-5 rounded-full border border-white/12 bg-white/10 px-5 py-3 text-white/90 shadow-2xl backdrop-blur-md">
-          <button
-            onClick={() => setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)}
-            className="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] transition-colors hover:bg-white/10 hover:text-white"
-          >
-            Prev
-          </button>
-          <span className="text-sm font-medium tracking-[0.2em]">
-            0{currentSlide + 1} / 0{heroSlides.length}
-          </span>
-          <button
-            onClick={() => setCurrentSlide((prev) => (prev + 1) % heroSlides.length)}
-            className="rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] transition-colors hover:bg-white/10 hover:text-white"
-          >
-            Next
-          </button>
-        </div>}
 
         <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-orange-100/10 rounded-full blur-[120px] -z-10" />
       </section>
@@ -996,7 +1046,7 @@ const WorkFit = () => {
               variants={challengeRevealContainer}
               initial="hidden"
               whileInView="show"
-              viewport={{ once: false, amount: 0.3 }}
+              viewport={{ once: true, amount: 0.3 }}
             >
               <motion.div variants={challengeRevealUp} className="text-orange-500 font-bold text-sm tracking-[0.2em] uppercase mb-4">
                 The Challenge
@@ -1036,7 +1086,7 @@ const WorkFit = () => {
               variants={challengeRevealRight}
               initial="hidden"
               whileInView="show"
-              viewport={{ once: false, amount: 0.25 }}
+              viewport={{ once: true, amount: 0.25 }}
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {[
@@ -1098,7 +1148,7 @@ const WorkFit = () => {
             variants={challengeRevealContainer}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: false, amount: 0.35 }}
+            viewport={{ once: true, amount: 0.35 }}
           >
             <motion.div variants={challengeRevealUp} className="text-orange-500 font-bold text-lg tracking-[0.2em] uppercase mb-4">
               How WorkFit Helps
@@ -1113,7 +1163,7 @@ const WorkFit = () => {
             variants={challengeRevealContainer}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: false, amount: 0.2 }}
+            viewport={{ once: true, amount: 0.2 }}
           >
             {[
               { title: 'Improve Well-being', desc: 'Reduce stress, boost energy, and support physical & mental health.', icon: Flower2, iconBg: 'bg-orange-500', img: '/images/wp1.webp' },
@@ -1153,7 +1203,7 @@ const WorkFit = () => {
             variants={challengeRevealContainer}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: false, amount: 0.2 }}
+            viewport={{ once: true, amount: 0.2 }}
           >
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-0">
               {[
@@ -1313,7 +1363,7 @@ const WorkFit = () => {
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.3 }}
+            viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.7, ease: 'easeOut' }}
             className="text-center mb-10 md:mb-12"
           >
@@ -1350,7 +1400,7 @@ const WorkFit = () => {
                   rel="noreferrer"
                   initial={{ opacity: 0, x: -60 }}
                   whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: false, amount: 0.2 }}
+                  viewport={{ once: true, amount: 0.2 }}
                   transition={{ duration: 0.7, ease: 'easeOut' }}
                   className="lg:col-span-1 rounded-2xl bg-[#111836] border border-white/5 overflow-hidden flex flex-col group hover:border-orange-400/35 transition-colors"
                 >
@@ -1398,7 +1448,7 @@ const WorkFit = () => {
                         rel="noreferrer"
                         initial={{ opacity: 0, y: 32 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: false, amount: 0.2 }}
+                        viewport={{ once: true, amount: 0.2 }}
                         transition={{ duration: 0.6, ease: 'easeOut', delay: idx * 0.08 }}
                         className="rounded-2xl bg-[#111836] border border-white/5 overflow-hidden flex flex-col group hover:border-white/15 transition-colors relative"
                       >
@@ -1449,7 +1499,7 @@ const WorkFit = () => {
               <motion.div
                 initial={{ opacity: 0, y: 50, scale: 0.97 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: false, amount: 0.3 }}
+                viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.7, ease: 'easeOut' }}
                 className="rounded-2xl bg-[#111836] border border-white/5 p-4 lg:py-5 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-6 mt-6 relative overflow-hidden"
               >
@@ -1501,7 +1551,7 @@ const WorkFit = () => {
             variants={challengeRevealContainer}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: false, amount: 0.3 }}
+            viewport={{ once: true, amount: 0.3 }}
           >
             <motion.div variants={challengeRevealUp} className="text-[#f97316] font-bold text-xs tracking-[0.25em] uppercase mb-4">TESTIMONIALS</motion.div>
             <motion.h2 variants={challengeRevealUp} className="text-4xl md:text-5xl lg:text-6xl font-sans font-extrabold text-[#0B1530] mb-5 tracking-tight leading-[1.1]">
@@ -1529,7 +1579,7 @@ const WorkFit = () => {
                 variants={challengeRevealContainer}
                 initial="hidden"
                 whileInView="show"
-                viewport={{ once: false, amount: 0.2 }}
+                viewport={{ once: true, amount: 0.2 }}
               >
                 <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[480px]">
                   {/* Left: Photo */}
@@ -1590,7 +1640,7 @@ const WorkFit = () => {
                           <div className="text-xs font-semibold text-gray-400 mt-0.5">{fT.role}</div>
                         </div>
                         <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-1 rounded-md flex items-center gap-1">
-                          🇺🇸 USA
+                          {formatCountryBadge('USA')}
                         </span>
                       </div>
                     </div>
@@ -1609,7 +1659,7 @@ const WorkFit = () => {
                 body: 'Employees felt more energized, relaxed, and productive after the sessions.',
                 name: 'Mary D.',
                 role: 'People Operations',
-                country: '🇺🇸 USA',
+                country: 'USA',
                 tags: ['Stretch Breaks', 'Energy', 'Productivity']
               }),
               getDynamicTestimonial(1, {
@@ -1618,7 +1668,7 @@ const WorkFit = () => {
                 body: 'The wellness challenges created excitement across teams and improved participation naturally.',
                 name: 'Priya S.',
                 role: 'Wellness Lead',
-                country: '🇮🇳 India',
+                country: 'India',
                 tags: ['Wellness Challenges', 'Engagement', 'Teamwork']
               }),
               getDynamicTestimonial(2, {
@@ -1627,7 +1677,7 @@ const WorkFit = () => {
                 body: 'The virtual wellness activities improved communication, engagement, and team morale.',
                 name: 'Kevin R.',
                 role: 'HR Director',
-                country: '🇺🇸 USA',
+                country: 'USA',
                 tags: ['Hybrid Wellness', 'Communication', 'Morale']
               }),
               getDynamicTestimonial(3, {
@@ -1636,7 +1686,7 @@ const WorkFit = () => {
                 body: 'Employees appreciated having practical wellness tools during demanding project cycles.',
                 name: 'Sarah M.',
                 role: 'Program Manager',
-                country: '🇬🇧 UK',
+                country: 'UK',
                 tags: ['Stress Reduction', 'Mindfulness', 'Well-being']
               }),
               // Mahesh
@@ -1646,7 +1696,7 @@ const WorkFit = () => {
                 body: 'The sessions are practical, engaging, and easy to integrate into our busy workday.',
                 name: 'Mahesh',
                 role: 'Founder & CEO',
-                country: '🇺🇸 USA',
+                country: 'USA',
                 tags: ['Energy', 'Focus', 'Team Wellness']
               }),
               // Shrikant
@@ -1656,7 +1706,7 @@ const WorkFit = () => {
                 body: 'We\'ve seen more energy, better concentration, and stronger teamwork.',
                 name: 'Shrikant',
                 role: 'Founder & CTO',
-                country: '🇺🇸 USA',
+                country: 'USA',
                 tags: ['Performance', 'Mindfulness', 'Teamwork']
               }),
               // Amita
@@ -1666,7 +1716,7 @@ const WorkFit = () => {
                 body: 'I loved it and felt an immediate sense of relaxation and positivity. I\'m excited to continue this journey with more sessions ahead.',
                 name: 'Amita',
                 role: 'Project Coordinator',
-                country: '🇬🇧 UK',
+                country: 'UK',
                 tags: ['First Class Experience', 'Relaxation', 'Excited']
               }),
               // Prasad
@@ -1676,7 +1726,7 @@ const WorkFit = () => {
                 body: 'Our employees are more consistent, less stressed, and more productive.',
                 name: 'Prasad',
                 role: 'Founder & MD',
-                country: '🇮🇳 India',
+                country: 'India',
                 tags: ['Holistic Wellness', 'Stress Relief', 'Productivity']
               }),
               // Madhu
@@ -1686,7 +1736,7 @@ const WorkFit = () => {
                 body: 'Our team looks forward to every session!',
                 name: 'Madhu',
                 role: 'Co-founder',
-                country: '🇺🇸 USA',
+                country: 'USA',
                 tags: ['Engagement', 'Flexibility', 'Well-being']
               }),
               // Emma
@@ -1696,7 +1746,7 @@ const WorkFit = () => {
                 body: 'Practical, well-guided, and perfect for busy professional life!',
                 name: 'Emma',
                 role: 'Professor',
-                country: '🇬🇧 UK',
+                country: 'UK',
                 tags: ['Refreshment', 'Energy', 'Wellness']
               }),
               // Bekir Orahan
@@ -1706,7 +1756,7 @@ const WorkFit = () => {
                 body: 'It gave us simple tools for better health, focus, and mental clarity.',
                 name: 'Bekir Orahan',
                 role: 'Professor',
-                country: '🇹🇷 Turkey',
+                country: 'Turkey',
                 tags: ['Mental Clarity', 'Focus', 'Practical Tools']
               }),
               // Michael Johnson
@@ -1716,29 +1766,29 @@ const WorkFit = () => {
                 body: 'We\'ve noticed less stress, better focus, and a happier team.',
                 name: 'Michael Johnson',
                 role: 'Director - People & Culture',
-                country: '🇺🇸 USA',
+                country: 'USA',
                 tags: ['Stress Reduction', 'Focus', 'Happiness']
               })
             ];
 
             return (
-              <motion.div className="relative flex overflow-hidden py-10 select-none group -mx-4 sm:-mx-6 lg:-mx-8 mb-16" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: false, amount: 0.15 }} transition={{ duration: 0.7, ease: 'easeOut' }}>
+              <motion.div className="relative flex overflow-hidden py-10 select-none group -mx-4 sm:-mx-6 lg:-mx-8 mb-16" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.7, ease: 'easeOut' }}>
                 <motion.div 
-                  animate={{ x: [0, -4608] }}
+                  animate={{ x: ['0%', '-50%'] }}
                   transition={{ 
-                    duration: 65, 
+                    duration: 95,
                     repeat: Infinity, 
                     ease: "linear"
                   }}
-                  className="flex gap-6 whitespace-nowrap min-w-full"
+                  className="flex gap-6 whitespace-nowrap min-w-max will-change-transform"
+                  style={{ transform: 'translate3d(0,0,0)' }}
                 >
                   {[...allWorkfitTestimonials, ...allWorkfitTestimonials].map((t, idx) => (
                     <motion.div 
                       key={idx} 
                       variants={challengeCardReveal(0.04 * (idx % 6))}
-                      whileHover={{ y: -8, scale: 1.015, transition: { duration: 0.22 } }}
                       onClick={() => setSelectedTestimonial(t)}
-                      className="w-[360px] cursor-pointer flex-shrink-0 rounded-[2rem] border border-gray-100 overflow-hidden bg-white shadow-[0_8px_30px_rgba(0,0,0,0.02)] flex flex-col hover:border-[#f97316]/50 hover:shadow-2xl hover:shadow-[#f97316]/10 transition-all duration-500 hover:-translate-y-2 group/card relative whitespace-normal"
+                      className="w-[360px] cursor-pointer flex-shrink-0 rounded-[2rem] border border-gray-100 overflow-hidden bg-white shadow-[0_8px_30px_rgba(0,0,0,0.02)] flex flex-col transition-[border-color,box-shadow,transform] duration-300 group/card relative whitespace-normal will-change-transform"
                     >
                       {/* Photo */}
                       <div className="h-44 overflow-hidden relative">
@@ -1778,7 +1828,7 @@ const WorkFit = () => {
                             </div>
                             {t.country && (
                               <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-1 rounded-md flex items-center gap-1">
-                                {t.country}
+                                {formatCountryBadge(t.country)}
                               </span>
                             )}
                           </div>
@@ -1796,7 +1846,7 @@ const WorkFit = () => {
           })()}
 
           {/* Stats Row */}
-          <motion.div className="rounded-[2.5rem] bg-gray-50/50 border border-gray-100 p-8 md:py-12 md:px-8 mb-16" variants={challengeRevealContainer} initial="hidden" whileInView="show" viewport={{ once: false, amount: 0.2 }}>
+          <motion.div className="rounded-[2.5rem] bg-gray-50/50 border border-gray-100 p-8 md:py-12 md:px-8 mb-16" variants={challengeRevealContainer} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-y-8 gap-x-4">
               {[
                 { icon: UserCircle2, value: 90, prefix: '', suffix: '%', label: 'employees prefer engaging wellness programs' },
@@ -1885,7 +1935,7 @@ const WorkFit = () => {
             variants={workfitWorksReveal}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: false, amount: 0.35 }}
+            viewport={{ once: true, amount: 0.35 }}
           >
             <motion.h2 className="text-5xl md:text-6xl lg:text-7xl font-sans font-bold mb-6 text-[#ff5722] tracking-tight relative inline-block" variants={workfitWorksReveal}>
               How Workfit Works
@@ -1902,7 +1952,7 @@ const WorkFit = () => {
             variants={workfitWorksContainer}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: false, amount: 0.2 }}
+            viewport={{ once: true, amount: 0.2 }}
           >
             {[
               {
@@ -1972,7 +2022,7 @@ const WorkFit = () => {
             variants={workfitWorksReveal}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: false, amount: 0.2 }}
+            viewport={{ once: true, amount: 0.2 }}
           >
             <div className="flex-1 p-8 md:p-10 flex flex-col lg:flex-row gap-8 lg:gap-10 items-center lg:items-center justify-between">
               
@@ -2021,7 +2071,7 @@ const WorkFit = () => {
             variants={workfitWorksReveal}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: false, amount: 0.2 }}
+            viewport={{ once: true, amount: 0.2 }}
           >
             A proven process. &nbsp;&nbsp;A healthier workforce. &nbsp;&nbsp;A stronger organization.
           </motion.div>
@@ -2038,7 +2088,7 @@ const WorkFit = () => {
             variants={workfitWorksContainer}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: false, amount: 0.2 }}
+            viewport={{ once: true, amount: 0.2 }}
           >
             {/* Left text */}
             <motion.div className="flex-1 w-full lg:max-w-xl" variants={workfitWorksCard(0)}>
@@ -2069,7 +2119,7 @@ const WorkFit = () => {
             variants={workfitWorksContainer}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: false, amount: 0.18 }}
+            viewport={{ once: true, amount: 0.18 }}
           >
             {[
               {
@@ -2133,7 +2183,7 @@ const WorkFit = () => {
             variants={workfitWorksReveal}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: false, amount: 0.2 }}
+            viewport={{ once: true, amount: 0.2 }}
           >
             <div className="p-8 lg:p-10 flex flex-col xl:flex-row gap-10 lg:gap-12 items-center justify-between w-full">
               
@@ -2252,7 +2302,7 @@ const WorkFit = () => {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-14"
             initial="hidden"
             whileInView="show"
-            viewport={{ once: false, amount: 0.2 }}
+            viewport={{ once: true, amount: 0.2 }}
             variants={{
               hidden: {},
               show: {
@@ -2436,7 +2486,7 @@ const WorkFit = () => {
               variants={challengeRevealContainer}
               initial="hidden"
               whileInView="show"
-              viewport={{ once: false, amount: 0.28 }}
+              viewport={{ once: true, amount: 0.28 }}
             >
               <motion.div variants={challengeRevealUp} className="text-orange-500 font-bold text-sm tracking-[0.2em] uppercase mb-4">
                 Do You Have Any Questions?
@@ -2501,7 +2551,7 @@ const WorkFit = () => {
               variants={challengeRevealRight}
               initial="hidden"
               whileInView="show"
-              viewport={{ once: false, amount: 0.25 }}
+              viewport={{ once: true, amount: 0.25 }}
             >
               <motion.div
                 className="rounded-2xl border border-white/10 bg-[#0d1530]/50 overflow-hidden divide-y divide-white/5 shadow-2xl backdrop-blur-sm"
@@ -2682,8 +2732,8 @@ const WorkFit = () => {
                       <div className="text-xs font-semibold text-gray-400 mt-0.5 leading-tight">{selectedTestimonial.role}</div>
                     </div>
                     {selectedTestimonial.country && (
-                      <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-1 rounded-md">
-                        {selectedTestimonial.country}
+                      <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-1 rounded-md flex items-center gap-1">
+                        {formatCountryBadge(selectedTestimonial.country)}
                       </span>
                     )}
                   </div>
@@ -2700,14 +2750,4 @@ const WorkFit = () => {
 };
 
 export default WorkFit;
-
-
-
-
-
-
-
-
-
-
 

@@ -17,6 +17,10 @@ export type YogaProgram = {
   updatedAt: string;
 };
 
+export type YogaType = YogaProgram & {
+  perfectFor: string[];
+};
+
 export type YogaProgramsSectionContent = {
   title: string;
   description: string;
@@ -50,6 +54,11 @@ export type YogaChallengesSectionContent = {
 
 export const fetchYogaPrograms = async () => {
   const response = await apiClient.get<YogaProgram[]>('/api/yoga-programs');
+  return response.data;
+};
+
+export const fetchYogaTypes = async () => {
+  const response = await apiClient.get<YogaType[]>('/api/yoga-types');
   return response.data;
 };
 

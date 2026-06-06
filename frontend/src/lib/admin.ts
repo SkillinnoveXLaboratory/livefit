@@ -51,6 +51,10 @@ export type AdminYogaProgram = {
   updatedAt: string;
 };
 
+export type AdminYogaType = AdminYogaProgram & {
+  perfectFor: string[];
+};
+
 export type AdminYogaChallenge = {
   id: string;
   title: string;
@@ -80,6 +84,11 @@ export type AdminYogaChallengesSectionContent = {
   title: string;
   description: string;
   quote: string;
+};
+
+export type AdminSiteSettings = {
+  livefitPhone: string;
+  workfitPhone: string;
 };
 
 export type AdminManagedUser = {
@@ -147,6 +156,7 @@ export type AdminGalleryImage = {
   title: string;
   image: string;
   alt: string;
+  category: string;
   displayOrder: number;
   isActive: boolean;
   createdAt: string;

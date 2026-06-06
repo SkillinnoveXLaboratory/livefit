@@ -26,7 +26,7 @@ const Playlists = lazy(() => import('./pages/Playlists'));
 const Gallery = lazy(() => import('./pages/Gallery'));
 
 const RouteFallback = () => (
-  <div className="min-h-screen bg-[#F5F5F3]" />
+  <div className="min-h-screen bg-white" />
 );
 
 const ProtectedRoutes = () => (
@@ -70,7 +70,7 @@ const Success = () => {
   const currencyLabel = currency === 'INR' ? '₹' : `${currency} `;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F5F5F3] px-6 py-20">
+    <div className="min-h-screen flex items-center justify-center bg-white px-6 py-20">
       <div className="w-full max-w-2xl text-center bg-white p-10 md:p-16 rounded-[3rem] shadow-2xl">
         <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-8">
           <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,9 +134,12 @@ const AdminProtectedRoute = () => {
 function App() {
   useEffect(() => {
     AOS.init({
-      duration: 1000,
-      easing: 'ease-in-out',
+      duration: 480,
+      easing: 'ease-out-cubic',
       once: true,
+      throttleDelay: 99,
+      debounceDelay: 50,
+      disable: () => window.innerWidth < 768,
     });
   }, []);
 

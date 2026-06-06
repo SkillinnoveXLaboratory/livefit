@@ -13,7 +13,7 @@ const WorkoutStats = () => {
       <div className="max-w-7xl mx-auto px-4">
         {/* Section Heading */}
         <div className="text-center mb-12">
-          <motion.h2 data-aos="fade-up" className="text-3xl md:text-5xl font-extrabold text-white font-serif mb-4"
+          <motion.h2 className="text-3xl md:text-5xl font-extrabold text-white font-serif mb-4"
           >
             Carry your workout Anywhere. Anytime!
           </motion.h2>
@@ -29,7 +29,7 @@ const WorkoutStats = () => {
           />
           
           {/* Global Network Overlay Image */}
-          <motion.div data-aos="fade-up" className="absolute inset-0 z-10 flex items-center justify-center"
+          <motion.div className="absolute inset-0 z-10 flex items-center justify-center"
           >
             <img 
               src="/images/globalnetwork.webp" 
@@ -42,7 +42,7 @@ const WorkoutStats = () => {
         {/* 2. Stats Section - Single Row & Smaller Font */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-8 border-t border-white/10">
           {stats.map((stat, index) => (
-            <motion.div data-aos="fade-up"  
+            <motion.div
               key={index} className="text-center px-4"
             >
               <div className="text-5xl md:text-6xl font-black text-white mb-3">

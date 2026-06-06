@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Flower2, ArrowRight, CheckCircle2, Users, Video, Clock, Play, Pause, ChevronLeft, ChevronRight, Check } from 'lucide-react';
@@ -168,7 +168,7 @@ const Hero = () => {
   }, [progress, handleNext]);
 
   return (
-    <section className="relative h-[68rem] md:h-[62rem] lg:h-[58rem] flex items-center overflow-hidden bg-[#F5F5F3] group/hero pt-24 md:pt-28">
+    <section className="relative h-[68rem] md:h-[62rem] lg:h-[58rem] flex items-center overflow-hidden bg-white group/hero pt-24 md:pt-28">
       {/* Background Image Layer */}
       <div className="absolute inset-0 z-0">
         <motion.div
@@ -204,7 +204,7 @@ const Hero = () => {
           </motion.div>
         </AnimatePresence>
         
-        <div className="absolute inset-y-0 left-0 w-full lg:w-[50%] bg-[#F5F5F3] hidden lg:block z-10" />
+        <div className="absolute inset-y-0 left-0 w-full lg:w-[50%] bg-white hidden lg:block z-10" />
         <div className="absolute inset-y-0 left-[50%] w-32 bg-gradient-to-r from-[#F5F5F3] to-transparent hidden lg:block z-10" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#F5F5F3] via-[#F5F5F3]/60 to-transparent lg:hidden z-10" />
       </div>
@@ -305,52 +305,6 @@ const Hero = () => {
               </motion.div>
             </motion.div>
           </AnimatePresence>
-        </div>
-      </div>
-
-      {/* Playback Controls & Progress - Moved to the Right */}
-      <div className="absolute bottom-10 right-6 md:right-12 lg:right-24 z-30 flex flex-col md:flex-row items-center gap-8">
-        {/* Indicators */}
-        <div className="hidden sm:flex items-center gap-4">
-          {slides.map((_, idx) => (
-            <div 
-              key={idx}
-              className="relative w-16 h-1 bg-white/20 rounded-full overflow-hidden cursor-pointer backdrop-blur-sm"
-              onClick={() => {
-                setCurrentSlide(idx);
-                setProgress(0);
-              }}
-            >
-              {currentSlide === idx && (
-                <motion.div 
-                  className="absolute inset-y-0 left-0 bg-orange-500"
-                  style={{ width: `${progress}%` }}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Controls */}
-        <div className="flex items-center gap-6 bg-[#2B2D42] text-white/90 px-6 py-3 rounded-full shadow-2xl backdrop-blur-md">
-          <button 
-            onClick={handlePrev}
-            className="hover:text-white transition-colors p-1 text-lg"
-          >
-            Prev
-          </button>
-          <button 
-            onClick={() => setIsPaused(!isPaused)}
-            className="hover:text-orange-400 text-orange-500 transition-colors flex items-center justify-center p-1"
-          >
-            {isPaused ? <Play size={18} fill="currentColor" /> : <Pause size={18} fill="currentColor" />}
-          </button>
-          <button 
-            onClick={handleNext}
-            className="hover:text-white transition-colors p-1 text-lg"
-          >
-            Next
-          </button>
         </div>
       </div>
 

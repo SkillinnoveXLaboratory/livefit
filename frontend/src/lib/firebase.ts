@@ -3,7 +3,6 @@ import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   getAuth,
-  sendEmailVerification,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -43,7 +42,6 @@ export const createFirebaseUser = async (name: string, email: string, password: 
 
   const credentials = await createUserWithEmailAndPassword(firebaseAuth, email, password);
   await updateProfile(credentials.user, { displayName: name });
-  await sendEmailVerification(credentials.user);
   return credentials.user;
 };
 

@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Calendar, Clock, Mail, CheckCircle2, ArrowRight, Globe2, MessageSquare, Target, Phone, ArrowLeft } from 'lucide-react';
@@ -138,7 +138,7 @@ const Schedule = () => {
 
   if (submitted) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center bg-[#F5F5F3] px-6">
+      <div className="min-h-[80vh] flex items-center justify-center bg-white px-6">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -163,7 +163,7 @@ const Schedule = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F5F3] pt-32 pb-20 px-4 sm:px-6">
+    <div className="min-h-screen bg-white pt-32 pb-20 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
         <button
           type="button"

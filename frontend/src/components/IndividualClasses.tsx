@@ -23,9 +23,6 @@ const IndividualClasses = () => {
                 Not ready for live sessions? Access our premium library of on-demand individual classes. Practice at your own pace, anytime, anywhere, with guided videos tailored for every skill level.
               </p>
               
-              <button className="px-8 py-4 bg-black text-white font-bold rounded-full hover:bg-slate-800 transition-colors shadow-lg">
-                Start Free Trial
-              </button>
             </motion.div>
           </div>
           

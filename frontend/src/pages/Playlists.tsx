@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Film, PlayCircle } from 'lucide-react';
 import { apiClient } from '../lib/api';
 import { resolveYogaImageUrl } from '../lib/yogaPrograms';
+import PremiumAccessGate from '../components/PremiumAccessGate';
+import { usePaidAccess } from '../hooks/usePaidAccess';
 
 type Playlist = {
   id: string;
@@ -17,6 +19,7 @@ type Playlist = {
 const Playlists = () => {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [loading, setLoading] = useState(true);
+  const { hasAccess, loading: accessLoading } = usePaidAccess('livefit');
 
   useEffect(() => {
     let active = true;
@@ -53,12 +56,23 @@ const Playlists = () => {
           </p>
         </motion.div>
 
-        {loading ? (
+        {loading || accessLoading ? (
           <div className="grid grid-cols-1 gap-7 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, idx) => (
               <div key={idx} className="h-96 animate-pulse rounded-[2rem] bg-white/70" />
             ))}
           </div>
+        ) : hasAccess === false ? (
+          <PremiumAccessGate
+            title="Playlists are unlocked for premium LiveFit members"
+            description="Unlock the playlist library to watch the videos published from the admin dashboard."
+            features={[
+              'Video playlists',
+              'Admin-managed thumbnails',
+              'Always current uploads',
+              'Full LiveFit library access',
+            ]}
+          />
         ) : playlists.length === 0 ? (
           <div className="rounded-[2rem] border border-dashed border-orange-200 bg-white px-8 py-16 text-center shadow-sm">
             <h2 className="text-2xl font-black">No playlists published yet</h2>

@@ -179,7 +179,7 @@ const UniqueNeeds = () => {
               </div>
             ))
           ) : visiblePrograms.length === 0 ? (
-            <div className="col-span-full rounded-[2rem] border border-dashed border-orange-200 bg-orange-50/40 px-8 py-12 text-center">
+            <div className="col-span-full rounded-[2rem] border border-dashed border-orange-200 bg-white px-8 py-12 text-center">
               <h3 className="text-2xl font-bold text-sky-950">No yoga programs published yet</h3>
               <p className="mt-3 text-sm text-slate-500">
                 Add your first program from the admin dashboard and it will appear here automatically.
@@ -188,7 +188,6 @@ const UniqueNeeds = () => {
           ) : (
             visiblePrograms.map((program, idx) => (
               <motion.div
-                data-aos="fade-up"
                 key={program.id || `${program.title}-${idx}`}
                 onClick={() => setSelectedProgram(program)}
                 className="group flex cursor-pointer flex-col"
@@ -221,8 +220,7 @@ const UniqueNeeds = () => {
         </div>
 
         <motion.div
-          data-aos="fade-up"
-          className="flex flex-col items-center justify-between gap-8 rounded-[3rem] border border-orange-100 bg-[#FFF8F2] px-8 py-8 md:px-16 lg:flex-row"
+          className="flex flex-col items-center justify-between gap-8 rounded-[3rem] border border-orange-100 bg-white px-8 py-8 md:px-16 lg:flex-row"
         >
           <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:text-left">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl border border-orange-50 bg-white text-orange-500 shadow-xl shadow-orange-100/50">
@@ -289,7 +287,7 @@ const UniqueNeeds = () => {
 
               <div className="custom-scrollbar overflow-y-auto p-10 md:p-12">
                 <div className="space-y-10">
-                  <div className="rounded-[2rem] border border-orange-100/50 bg-orange-50/30 p-8">
+                  <div className="rounded-[2rem] border border-orange-100/50 bg-white p-8">
                     <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-slate-900">
                       <Target className="h-5 w-5 text-orange-500" /> Overview
                     </h3>

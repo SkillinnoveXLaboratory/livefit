@@ -239,10 +239,10 @@ const WorkFitMembershipGate = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5F3] pt-32 pb-20 px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-white pt-32 pb-20 px-6 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-20 left-[-8%] w-72 h-72 rounded-full bg-sky-100/50 blur-3xl" />
-        <div className="absolute bottom-0 right-[-5%] w-96 h-96 rounded-full bg-orange-100/50 blur-3xl" />
+        <div className="absolute bottom-0 right-[-5%] w-96 h-96 rounded-full bg-slate-50 blur-3xl" />
       </div>
 
       <div className="max-w-6xl mx-auto text-center mb-16 relative z-10">

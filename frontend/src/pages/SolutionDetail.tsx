@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { 
@@ -696,7 +696,7 @@ const SolutionDetail = () => {
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            className="bg-[#fffaf5] p-10 md:p-20 rounded-[4rem] shadow-sm border border-sky-50 relative overflow-hidden"
+            className="bg-white p-10 md:p-20 rounded-[4rem] shadow-sm border border-sky-50 relative overflow-hidden"
           >
             <Quote className="w-32 h-32 text-orange-500/5 absolute -top-10 -right-10" />
             <div className="relative z-10">

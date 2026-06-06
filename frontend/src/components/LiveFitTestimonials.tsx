@@ -172,6 +172,24 @@ const testimonialsData = [
   }
 ];
 
+const countryFlagMap: Record<string, string> = {
+  USA: '\uD83C\uDDFA\uD83C\uDDF8',
+  UK: '\uD83C\uDDEC\uD83C\uDDE7',
+  Finland: '\uD83C\uDDEB\uD83C\uDDEE',
+  Canada: '\uD83C\uDDE8\uD83C\uDDE6',
+  Germany: '\uD83C\uDDE9\uD83C\uDDEA',
+  Australia: '\uD83C\uDDE6\uD83C\uDDFA',
+  India: '\uD83C\uDDEE\uD83C\uDDF3',
+  France: '\uD83C\uDDEB\uD83C\uDDF7',
+  Arizona: '\uD83C\uDDFA\uD83C\uDDF8',
+};
+
+const getCountryBadge = (location: string) => {
+  const country = location.split(',').pop()?.trim() || location;
+  const flag = countryFlagMap[country] || '';
+  return flag ? `${flag} ${country}` : country;
+};
+
 const LiveFitTestimonials = () => {
   const navigate = useNavigate();
   const [selectedTestimonial, setSelectedTestimonial] = useState<any>(null);
@@ -224,7 +242,7 @@ const LiveFitTestimonials = () => {
                 <div className="whitespace-normal">
                   <h4 className="font-bold text-sky-950 text-lg leading-tight">{t.name}</h4>
                   <div className="text-[10px] text-gray-400 flex items-center gap-2 mt-1 uppercase tracking-wider font-semibold">
-                    <span>{t.date}</span>
+                    <span>{getCountryBadge(t.location)}</span>
                   </div>
                 </div>
               </div>
@@ -277,7 +295,7 @@ const LiveFitTestimonials = () => {
                 <div>
                   <h4 className="font-bold text-sky-950 text-2xl mb-1">{selectedTestimonial.name}</h4>
                   <div className="text-xs text-orange-500 uppercase tracking-wider font-bold">
-                    {selectedTestimonial.date} 
+                    {getCountryBadge(selectedTestimonial.location)}
                   </div>
                 </div>
               </div>

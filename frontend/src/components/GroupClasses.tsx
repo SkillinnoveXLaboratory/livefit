@@ -1,8 +1,11 @@
-﻿import React from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const GroupClasses = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="py-24 bg-slate-50 text-black">
       <div className="w-full px-4 md:px-8 lg:px-20">
@@ -50,7 +53,10 @@ const GroupClasses = () => {
                 </div>
               </div>
               
-              <button className="px-8 py-4 bg-orange-500 text-white font-bold rounded-full hover:bg-orange-600 transition-colors shadow-lg shadow-orange-500/30">
+              <button
+                className="px-8 py-4 bg-orange-500 text-white font-bold rounded-full hover:bg-orange-600 transition-colors shadow-lg shadow-orange-500/30"
+                onClick={() => navigate('/livefitinquiry')}
+              >
                 Explore Group Schedule
               </button>
             </motion.div>
@@ -63,4 +69,3 @@ const GroupClasses = () => {
 };
 
 export default GroupClasses;
-

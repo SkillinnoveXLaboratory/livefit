@@ -1,13 +1,33 @@
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Mail, MapPin, Phone } from 'lucide-react';
 import Navigation from './Navigation';
 import Logo from './Logo';
 import FloatingChat from './FloatingChat';
+import { apiClient } from '../lib/api';
+import { getSiteContactSettings, storeSiteContactSettings, type SiteContactSettings } from '../lib/account';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const isWorkFitPage = location.pathname.startsWith('/workfit') || location.pathname.startsWith('/solutions');
   const helpCenterPath = isWorkFitPage ? '/workfitinquiry' : '/livefitinquiry';
+  const [contactSettings, setContactSettings] = useState<SiteContactSettings>(getSiteContactSettings());
+
+  useEffect(() => {
+    let active = true;
+
+    apiClient.get<SiteContactSettings>('/api/content/site-settings')
+      .then((response) => {
+        if (!active) return;
+        setContactSettings(response.data);
+        storeSiteContactSettings(response.data);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-brand-white flex flex-col w-full">
@@ -59,11 +79,18 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   </div>
                   Workfitbylivefit@gmail.com
                 </li>
-                <li className="flex items-center justify-center md:justify-start gap-4 text-sky-800 text-sm font-bold">
-                  <div className="w-8 h-8 rounded-lg bg-sky-50 flex items-center justify-center text-sky-400">
+                <li className="flex items-start justify-center md:justify-start gap-4 text-sky-800 text-sm font-bold">
+                  <div className="mt-0.5 w-8 h-8 rounded-lg bg-sky-50 flex items-center justify-center text-sky-400">
                     <Phone className="w-4 h-4" />
                   </div>
-                  +91 9890008742
+                  <div className="space-y-1 text-left">
+                    <a href={`tel:+${String(contactSettings.livefitPhone || '919890008742').replace(/\D/g, '')}`} className="block hover:text-sky-950 transition-colors">
+                      LiveFit: {contactSettings.livefitPhone || '+91 9890008742'}
+                    </a>
+                    <a href={`tel:+${String(contactSettings.workfitPhone || '19256602776').replace(/\D/g, '')}`} className="block text-sky-500 hover:text-sky-950 transition-colors">
+                      WorkFit: {contactSettings.workfitPhone || '+1 925 660 2776'}
+                    </a>
+                  </div>
                 </li>
                 <li className="flex items-center justify-center md:justify-start gap-4 text-sky-800 text-sm font-bold">
                   <div className="w-8 h-8 rounded-lg bg-sky-50 flex items-center justify-center text-sky-400">

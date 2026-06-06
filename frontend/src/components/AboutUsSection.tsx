@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import {
   Building2,
@@ -132,7 +132,7 @@ const AboutUsSection = () => {
             variants={leftColumnVariants}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: false, amount: 0.25 }}
+            viewport={{ once: true, amount: 0.25 }}
           >
             <motion.div variants={revealItemVariants}>
               <div className="text-orange-500 font-bold tracking-widest text-[10px] mb-4 uppercase">OUR STORY</div>
@@ -163,7 +163,7 @@ const AboutUsSection = () => {
               variants={revealItemVariants}
               className="mt-12 p-6 rounded-2xl bg-white border border-orange-100 flex items-start gap-6 shadow-sm"
             >
-              <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center text-white shrink-0 shadow-lg shadow-orange-100 p-1">
+              <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white flex items-center justify-center text-white shrink-0 shadow-lg shadow-orange-100 p-2">
                 <img src="/images/flowerlogo2.webp" alt="Lotus" className="w-full h-full object-contain" />
               </div>
               <p className="text-sm md:text-base text-slate-600 font-medium italic">
@@ -178,7 +178,7 @@ const AboutUsSection = () => {
             variants={rightColumnVariants}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: false, amount: 0.2 }}
+            viewport={{ once: true, amount: 0.2 }}
           >
             <div className="flex-1 flex flex-col gap-0">
               <motion.div variants={slowCardReveal(0.08)} className="bg-white rounded-tl-[2.5rem] shadow-xl flex flex-col group cursor-pointer border border-slate-50 overflow-hidden relative h-[240px] md:h-[300px]">

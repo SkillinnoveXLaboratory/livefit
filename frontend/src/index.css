@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --color-sky-50: #fffaf5;
-  --color-sky-100: #fee7d1;
-  --color-sky-200: #ffb366;
+  --color-sky-50: #ffffff;
+  --color-sky-100: #f8fafc;
+  --color-sky-200: #e2e8f0;
   --color-sky-300: #ff9933;
   --color-sky-400: #ff8c1a;
   --color-sky-500: #ff7f00;
@@ -15,15 +15,16 @@
 
   --color-brand-primary: #ff7f00;
   --color-brand-dark: #111111;
-  --color-brand-white: #fffaf5;
+  --color-brand-white: #ffffff;
   
-  --font-serif: "Instrument Serif", serif;
-  --font-sans: "Inter", sans-serif;
+  --font-serif: "Source Serif 4", serif;
+  --font-sans: "Source Serif 4", serif;
 }
 
 @layer base {
   body {
-    @apply bg-sky-50 text-sky-950 antialiased selection:bg-sky-500 selection:text-white;
+    @apply bg-white text-sky-950 antialiased selection:bg-sky-500 selection:text-white;
+    font-family: var(--font-sans);
     overflow-x: clip;
     max-width: 100%;
   }
@@ -34,10 +35,10 @@
     width: 10px;
   }
   ::-webkit-scrollbar-track {
-    @apply bg-sky-50;
+    @apply bg-white;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-sky-200 rounded-full border-2 border-sky-50 hover:bg-sky-300 transition-colors;
+    @apply bg-slate-200 rounded-full border-2 border-white hover:bg-slate-300 transition-colors;
   }
 }
 
@@ -79,7 +80,7 @@ html {
 
 .wellness-cards-container {
   --card-width: 380px;
-  --card-height: 560px;
+  --card-height: 640px;
   --transition-speed: 0.6s;
   position: relative;
   width: 100%;
@@ -190,7 +191,7 @@ html {
 .visual-container {
   position: relative;
   width: 100%;
-  height: 220px;
+  height: 190px;
   border-radius: 12px;
   overflow: hidden;
   background: #252e41;
@@ -292,9 +293,11 @@ html {
 }
 
 .stack-badge {
-  position: absolute;
-  top: 24px;
-  right: 24px;
+  position: static;
+  display: inline-flex;
+  align-self: flex-start;
+  margin-top: 12px;
+  margin-bottom: 4px;
   background-color: #2563eb;
   padding: 5px 10px;
   border-radius: 999px;
@@ -390,6 +393,81 @@ html {
   font-weight: 700;
 }
 
+.team-schedule,
+.reset-routine {
+  bottom: 18px;
+  left: 18px;
+  right: 18px;
+  display: grid;
+  gap: 7px;
+}
+
+.team-schedule span {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 6px;
+  color: #cbd5e1;
+}
+
+.reset-routine span {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  align-items: center;
+  gap: 7px;
+  color: #e2e8f0;
+}
+
+.reset-routine b {
+  display: grid;
+  height: 20px;
+  place-items: center;
+  border-radius: 999px;
+  background: #f97316;
+  color: white;
+  font-size: 10px;
+}
+
+.stack-visual-tags {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.stack-visual-tags span {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.78);
+  padding: 4px 8px;
+  color: white;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stack-detail-blocks {
+  display: grid;
+  gap: 10px;
+}
+
+.stack-detail-blocks > div {
+  border-left: 2px solid #10b981;
+  padding-left: 10px;
+}
+
+.stack-detail-blocks strong {
+  font-size: 12px;
+}
+
+.stack-detail-blocks p {
+  margin-top: 3px;
+  color: #94a3b8;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
 .card-footer {
   margin-top: auto;
   display: flex;
@@ -413,7 +491,7 @@ html {
 @media (max-width: 1100px) {
   .wellness-cards-container {
     --card-width: 340px;
-    --card-height: 520px;
+    --card-height: 600px;
   }
 
   .wellness-card.state-left-1 {
@@ -435,9 +513,9 @@ html {
 @media (max-width: 800px) {
   .wellness-cards-container {
     --card-width: 290px;
-    --card-height: 480px;
+    --card-height: 560px;
     perspective: none;
-    height: 520px;
+    height: 590px;
   }
 
   .wellness-card.state-left-1 {
@@ -459,10 +537,6 @@ html {
   .check-list,
   .overlaid-component {
     font-size: 11px;
-  }
-
-  .stack-badge {
-    display: none;
   }
 
   .wellness-score-dial {
@@ -488,7 +562,7 @@ html {
 @media (max-width: 500px) {
   .wellness-cards-container {
     --card-width: 260px;
-    --card-height: 450px;
+    --card-height: 540px;
   }
 
   .wellness-card {

@@ -526,7 +526,7 @@ const WorkFitSolutionDetail = ({ solutionId }: { solutionId: string }) => {
       <section className="bg-[#0a1128] text-white pt-28 pb-10 border-b border-white/5 relative z-10">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center gap-2 text-xs font-bold tracking-wider uppercase text-slate-400">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+            <Link to="/workfit" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight className="w-3.5 h-3.5" />
             <Link to="/workfit" className="hover:text-white transition-colors">Solutions</Link>
             <ChevronRight className="w-3.5 h-3.5" />

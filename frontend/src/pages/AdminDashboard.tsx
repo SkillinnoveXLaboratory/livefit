@@ -1,6 +1,6 @@
 ﻿import React, { useEffect, useMemo, useState } from 'react';
 import { AxiosError } from 'axios';
-import { BadgeCheck, Box, ChevronLeft, ChevronRight, ClipboardList, CreditCard, Film, ImagePlus, Images, LayoutDashboard, LogOut, Menu, MessageCircle, Pencil, Plus, Save, Send, Target, Trash2, Users, X } from 'lucide-react';
+import { BadgeCheck, Box, ChevronLeft, ChevronRight, ClipboardList, CreditCard, Film, ImagePlus, Images, LayoutDashboard, Leaf, LogOut, Menu, MessageCircle, Pencil, Plus, Save, Send, Settings2, Target, Trash2, Users, X } from 'lucide-react';
 import '../styles/admin.css';
 import {
   ADMIN_DASHBOARD_PATH,
@@ -20,37 +20,43 @@ import {
   type AdminPaidUsersResponse,
   type AdminPlaylist,
   type AdminSectionContent,
+  type AdminSiteSettings,
   type AdminUsersResponse,
   type AdminWorkfitChallenge,
   type AdminYogaChallenge,
   type AdminYogaChallengesSectionContent,
   type AdminYogaProgram,
+  type AdminYogaType,
 } from '../lib/admin';
 import { resolveYogaImageUrl } from '../lib/yogaPrograms';
 
-type View = 'dashboard' | 'yoga-programs' | 'yoga-challenges' | 'users' | 'paid-users' | 'workfit-challenges' | 'playlists' | 'gallery' | 'packages' | 'chats';
-type ModalType = 'program' | 'yoga-challenge' | 'user' | 'paid-user' | 'challenge' | 'playlist' | 'gallery' | 'package' | null;
+type View = 'dashboard' | 'yoga-programs' | 'yoga-types' | 'yoga-challenges' | 'users' | 'paid-users' | 'workfit-challenges' | 'playlists' | 'gallery' | 'packages' | 'chats' | 'settings';
+type ModalType = 'program' | 'yoga-type' | 'yoga-challenge' | 'user' | 'paid-user' | 'challenge' | 'playlist' | 'gallery' | 'package' | null;
 
 type ProgramForm = { title: string; tagline: string; desc: string; iconKey: string; overview: string; details: string; benefits: string; displayOrder: string; isActive: boolean; image: string; imageFile: File | null };
+type YogaTypeForm = ProgramForm & { perfectFor: string };
 type YogaChallengeForm = { title: string; desc: string; iconKey: string; days: string; level: string; category: string; color: string; overview: string; follow: string; bestFor: string; displayOrder: string; isActive: boolean; image: string; imageFile: File | null };
 type UserForm = { name: string; email: string; phone: string; role: 'livefit' | 'workfit' | 'admin'; focusAreas: string; password: string };
 type PaidUserForm = { status: 'free' | 'paid'; product: 'livefit' | 'workfit'; planId: string; planName: string; expiresAt: string };
 type ChallengeForm = { slug: string; title: string; desc: string; image: string; imageFile: File | null; stat: string; statDesc: string; displayOrder: string; isActive: boolean };
 type PlaylistForm = { title: string; description: string; videoUrl: string; thumbnail: string; thumbnailFile: File | null; category: string; displayOrder: string; isActive: boolean };
-type GalleryForm = { title: string; alt: string; image: string; imageFile: File | null; displayOrder: string; isActive: boolean };
+type GalleryForm = { title: string; alt: string; category: string; image: string; imageFile: File | null; displayOrder: string; isActive: boolean };
 type PackageForm = { slug: string; name: string; priceLabel: string; amount: string; currency: string; period: string; features: string[]; ctaLabel: string; checkoutType: 'razorpay' | 'whatsapp'; isPopular: boolean; displayOrder: string; isActive: boolean };
+type SiteSettingsForm = { livefitPhone: string; workfitPhone: string };
 
 const defaultProgramForm: ProgramForm = { title: '', tagline: '', desc: '', iconKey: 'dumbbell', overview: '', details: '', benefits: '', displayOrder: '', isActive: true, image: '', imageFile: null };
+const defaultYogaTypeForm: YogaTypeForm = { ...defaultProgramForm, iconKey: 'leaf', perfectFor: '' };
 const defaultYogaChallengeForm: YogaChallengeForm = { title: '', desc: '', iconKey: 'target', days: '30 Days', level: 'All Levels', category: 'Fitness', color: 'bg-orange-500', overview: '', follow: '', bestFor: '', displayOrder: '', isActive: true, image: '', imageFile: null };
 const defaultUserForm: UserForm = { name: '', email: '', phone: '', role: 'livefit', focusAreas: '', password: '' };
 const defaultPaidUserForm: PaidUserForm = { status: 'free', product: 'livefit', planId: '', planName: 'Free Access', expiresAt: '' };
 const defaultChallengeForm: ChallengeForm = { slug: '', title: '', desc: '', image: '', imageFile: null, stat: '', statDesc: '', displayOrder: '', isActive: true };
 const defaultPlaylistForm: PlaylistForm = { title: '', description: '', videoUrl: '', thumbnail: '', thumbnailFile: null, category: 'Wellness', displayOrder: '', isActive: true };
-const defaultGalleryForm: GalleryForm = { title: '', alt: '', image: '', imageFile: null, displayOrder: '', isActive: true };
+const defaultGalleryForm: GalleryForm = { title: '', alt: '', category: 'Picture Gallery', image: '', imageFile: null, displayOrder: '', isActive: true };
 const defaultPackageForm: PackageForm = { slug: '', name: '', priceLabel: '', amount: '', currency: 'INR', period: '', features: [''], ctaLabel: 'Buy Plan', checkoutType: 'razorpay', isPopular: false, displayOrder: '', isActive: true };
+const defaultSiteSettingsForm: SiteSettingsForm = { livefitPhone: '+91 9890008742', workfitPhone: '+1 9256602776' };
 const defaultChatSettings: AdminChatSettings = { autoReplyEnabled: true, autoReplyMessage: 'Thanks for reaching out. A wellness expert will reply shortly.' };
 
-const iconOptions = ['dumbbell', 'heart', 'brain', 'baby', 'flame', 'user-round', 'smile', 'users', 'user', 'trophy', 'sparkles', 'sun', 'clock', 'bed', 'leaf', 'zap', 'target'];
+const iconOptions = ['dumbbell', 'heart', 'brain', 'baby', 'flame', 'user-round', 'smile', 'users', 'user', 'trophy', 'sparkles', 'sun', 'clock', 'bed', 'leaf', 'zap', 'target', 'chair', 'wind', 'moon'];
 const challengeColorOptions = ['bg-orange-500', 'bg-green-500', 'bg-purple-500', 'bg-emerald-500', 'bg-blue-500', 'bg-rose-500', 'bg-teal-500', 'bg-amber-500'];
 
 const formatDate = (value?: string | null) => {
@@ -69,6 +75,20 @@ const toProgramForm = (program: AdminYogaProgram): ProgramForm => ({
   displayOrder: String(program.displayOrder),
   isActive: program.isActive,
   image: program.image,
+  imageFile: null,
+});
+const toYogaTypeForm = (type: AdminYogaType): YogaTypeForm => ({
+  title: type.title,
+  tagline: type.tagline,
+  desc: type.desc,
+  iconKey: type.iconKey,
+  overview: type.overview,
+  details: type.details,
+  benefits: type.benefits.join('\n'),
+  perfectFor: type.perfectFor.join('\n'),
+  displayOrder: String(type.displayOrder),
+  isActive: type.isActive,
+  image: type.image,
   imageFile: null,
 });
 const toYogaChallengeForm = (challenge: AdminYogaChallenge): YogaChallengeForm => ({
@@ -97,7 +117,7 @@ const toPaidUserForm = (user: AdminPaidUser): PaidUserForm => ({
 });
 const toChallengeForm = (challenge: AdminWorkfitChallenge): ChallengeForm => ({ slug: challenge.slug, title: challenge.title, desc: challenge.desc, image: challenge.image, imageFile: null, stat: challenge.stat, statDesc: challenge.statDesc, displayOrder: String(challenge.displayOrder), isActive: challenge.isActive });
 const toPlaylistForm = (playlist: AdminPlaylist): PlaylistForm => ({ title: playlist.title, description: playlist.description, videoUrl: playlist.videoUrl, thumbnail: playlist.thumbnail, thumbnailFile: null, category: playlist.category, displayOrder: String(playlist.displayOrder), isActive: playlist.isActive });
-const toGalleryForm = (image: AdminGalleryImage): GalleryForm => ({ title: image.title, alt: image.alt, image: image.image, imageFile: null, displayOrder: String(image.displayOrder), isActive: image.isActive });
+const toGalleryForm = (image: AdminGalleryImage): GalleryForm => ({ title: image.title, alt: image.alt, category: image.category || 'Picture Gallery', image: image.image, imageFile: null, displayOrder: String(image.displayOrder), isActive: image.isActive });
 const toPackageForm = (plan: AdminPackage): PackageForm => ({ slug: plan.slug, name: plan.name, priceLabel: plan.priceLabel, amount: String(plan.amount), currency: plan.currency, period: plan.period, features: plan.features.length ? plan.features : [''], ctaLabel: plan.ctaLabel, checkoutType: plan.checkoutType, isPopular: plan.isPopular, displayOrder: String(plan.displayOrder), isActive: plan.isActive });
 
 const Field = ({ label, full = false, children }: { label: string; full?: boolean; children: React.ReactNode }) => (
@@ -122,7 +142,7 @@ const ImagePreview = ({ src, alt }: { src: string; alt: string }) => (
   <div className="admin-form-field full">
     <label>Image Preview</label>
     <div className="admin-image-preview">
-      {src ? <img src={src} alt={alt} /> : <div className="admin-empty-preview"><ImagePlus size={24} />Upload a photo to store it in backend/uploads.</div>}
+      {src ? <img src={src} alt={alt} /> : <div className="admin-empty-preview"><ImagePlus size={24} />Upload a photo to store it securely in Cloudflare R2.</div>}
     </div>
   </div>
 );
@@ -135,6 +155,7 @@ const AdminDashboard = () => {
   const [activeView, setActiveView] = useState<View>('dashboard');
   const [overview, setOverview] = useState<AdminOverviewResponse | null>(null);
   const [programs, setPrograms] = useState<AdminYogaProgram[]>([]);
+  const [yogaTypes, setYogaTypes] = useState<AdminYogaType[]>([]);
   const [yogaChallenges, setYogaChallenges] = useState<AdminYogaChallenge[]>([]);
   const [usersResponse, setUsersResponse] = useState<AdminUsersResponse>({ users: [], total: 0, page: 1, limit: 10, totalPages: 1 });
   const [paidUsersResponse, setPaidUsersResponse] = useState<AdminPaidUsersResponse>({ users: [], total: 0, page: 1, limit: 10, totalPages: 1 });
@@ -151,6 +172,8 @@ const AdminDashboard = () => {
   const [replyText, setReplyText] = useState('');
   const [chatSettings, setChatSettings] = useState<AdminChatSettings>(defaultChatSettings);
   const [savingChatSettings, setSavingChatSettings] = useState(false);
+  const [siteSettings, setSiteSettings] = useState<SiteSettingsForm>(defaultSiteSettingsForm);
+  const [savingSiteSettings, setSavingSiteSettings] = useState(false);
   const [sectionContent, setSectionContent] = useState<AdminSectionContent>({ title: 'Wellness Programs for Every Lifestyle', description: 'Personalized wellness experiences designed to help you move better, feel stronger, reduce stress, and live healthier.' });
   const [challengeSectionContent, setChallengeSectionContent] = useState<AdminYogaChallengesSectionContent>({ eyebrow: 'Programs & Challenges', title: 'Programs That Transform Habits', description: 'Join expert-designed 30-day programs and challenges that help you build discipline, stay motivated, and create lasting change one day at a time.', quote: 'One Commitment. 30 Days. A healthier, stronger, calmer you.' });
   const [loading, setLoading] = useState(true);
@@ -160,6 +183,7 @@ const AdminDashboard = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [modalType, setModalType] = useState<ModalType>(null);
   const [editingProgramId, setEditingProgramId] = useState<string | null>(null);
+  const [editingYogaTypeId, setEditingYogaTypeId] = useState<string | null>(null);
   const [editingYogaChallengeId, setEditingYogaChallengeId] = useState<string | null>(null);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [editingPaidUserId, setEditingPaidUserId] = useState<string | null>(null);
@@ -168,6 +192,7 @@ const AdminDashboard = () => {
   const [editingGalleryId, setEditingGalleryId] = useState<string | null>(null);
   const [editingPackageId, setEditingPackageId] = useState<string | null>(null);
   const [programForm, setProgramForm] = useState<ProgramForm>(defaultProgramForm);
+  const [yogaTypeForm, setYogaTypeForm] = useState<YogaTypeForm>(defaultYogaTypeForm);
   const [yogaChallengeForm, setYogaChallengeForm] = useState<YogaChallengeForm>(defaultYogaChallengeForm);
   const [userForm, setUserForm] = useState<UserForm>(defaultUserForm);
   const [paidUserForm, setPaidUserForm] = useState<PaidUserForm>(defaultPaidUserForm);
@@ -213,9 +238,10 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       resetMessages();
-      const [overviewRes, programsRes, yogaChallengesRes, sectionRes, challengeSectionRes, challengesRes, playlistsRes, galleryRes, usersRes, paidUsersRes, packagesRes, chatsRes, chatSettingsRes] = await Promise.all([
+      const [overviewRes, programsRes, yogaTypesRes, yogaChallengesRes, sectionRes, challengeSectionRes, challengesRes, playlistsRes, galleryRes, usersRes, paidUsersRes, packagesRes, chatsRes, chatSettingsRes, siteSettingsRes] = await Promise.all([
         adminApiClient.get<AdminOverviewResponse>('/api/admin/overview', { headers: authHeaders }),
         adminApiClient.get<AdminYogaProgram[]>('/api/admin/yoga-programs', { headers: authHeaders }),
+        adminApiClient.get<AdminYogaType[]>('/api/admin/yoga-types', { headers: authHeaders }),
         adminApiClient.get<AdminYogaChallenge[]>('/api/admin/yoga-challenges', { headers: authHeaders }),
         adminApiClient.get<AdminSectionContent>('/api/content/yoga-programs-section'),
         adminApiClient.get<AdminYogaChallengesSectionContent>('/api/content/yoga-challenges-section'),
@@ -227,9 +253,11 @@ const AdminDashboard = () => {
         adminApiClient.get<AdminPackage[]>('/api/admin/packages', { headers: authHeaders }),
         adminApiClient.get<AdminChatThread[]>('/api/admin/chats', { headers: authHeaders }),
         adminApiClient.get<AdminChatSettings>('/api/admin/chat-settings', { headers: authHeaders }),
+        adminApiClient.get<AdminSiteSettings>('/api/content/site-settings'),
       ]);
       setOverview(overviewRes.data);
       setPrograms(programsRes.data);
+      setYogaTypes(yogaTypesRes.data);
       setYogaChallenges(yogaChallengesRes.data);
       setSectionContent(sectionRes.data);
       setChallengeSectionContent(challengeSectionRes.data);
@@ -241,6 +269,7 @@ const AdminDashboard = () => {
       setPackages(packagesRes.data);
       setChats(chatsRes.data);
       setChatSettings(chatSettingsRes.data);
+      setSiteSettings(siteSettingsRes.data);
       if (chatsRes.data.length > 0) setSelectedChatId(chatsRes.data[0].id);
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Unable to load the admin dashboard right now.'));
@@ -257,6 +286,7 @@ const AdminDashboard = () => {
   useEffect(() => { if (adminToken) loadPaidUsers(paidUserPage, paidUserSearch).catch((err: unknown) => setError(getErrorMessage(err, 'Unable to load paid users.'))); }, [paidUserPage]);
 
   const programPreview = useMemo(() => programForm.imageFile ? URL.createObjectURL(programForm.imageFile) : resolveYogaImageUrl(programForm.image), [programForm.image, programForm.imageFile]);
+  const yogaTypePreview = useMemo(() => yogaTypeForm.imageFile ? URL.createObjectURL(yogaTypeForm.imageFile) : resolveYogaImageUrl(yogaTypeForm.image), [yogaTypeForm.image, yogaTypeForm.imageFile]);
   const yogaChallengePreview = useMemo(() => yogaChallengeForm.imageFile ? URL.createObjectURL(yogaChallengeForm.imageFile) : resolveYogaImageUrl(yogaChallengeForm.image), [yogaChallengeForm.image, yogaChallengeForm.imageFile]);
   const challengePreview = useMemo(() => challengeForm.imageFile ? URL.createObjectURL(challengeForm.imageFile) : resolveYogaImageUrl(challengeForm.image), [challengeForm.image, challengeForm.imageFile]);
   const playlistPreview = useMemo(() => playlistForm.thumbnailFile ? URL.createObjectURL(playlistForm.thumbnailFile) : resolveYogaImageUrl(playlistForm.thumbnail), [playlistForm.thumbnail, playlistForm.thumbnailFile]);
@@ -265,21 +295,22 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     return () => {
-      [programPreview, yogaChallengePreview, challengePreview, playlistPreview, galleryPreview]
+      [programPreview, yogaTypePreview, yogaChallengePreview, challengePreview, playlistPreview, galleryPreview]
         .filter((value) => value.startsWith('blob:'))
         .forEach((value) => URL.revokeObjectURL(value));
     };
-  }, [programPreview, yogaChallengePreview, challengePreview, playlistPreview, galleryPreview]);
+  }, [programPreview, yogaTypePreview, yogaChallengePreview, challengePreview, playlistPreview, galleryPreview]);
 
   const setView = (view: View) => { setActiveView(view); setSidebarOpen(false); if (view === 'chats') loadChats().catch(() => undefined); };
   const handleLogout = () => { clearAdminSession(); window.location.assign(ADMIN_LOGIN_PATH); };
   const closeModal = () => {
     if (submitting) return;
-    setModalType(null); setEditingProgramId(null); setEditingYogaChallengeId(null); setEditingUserId(null); setEditingPaidUserId(null); setEditingChallengeId(null); setEditingPlaylistId(null); setEditingGalleryId(null); setEditingPackageId(null);
-    setProgramForm(defaultProgramForm); setYogaChallengeForm(defaultYogaChallengeForm); setUserForm(defaultUserForm); setPaidUserForm(defaultPaidUserForm); setChallengeForm(defaultChallengeForm); setPlaylistForm(defaultPlaylistForm); setGalleryForm(defaultGalleryForm); setPackageForm(defaultPackageForm);
+    setModalType(null); setEditingProgramId(null); setEditingYogaTypeId(null); setEditingYogaChallengeId(null); setEditingUserId(null); setEditingPaidUserId(null); setEditingChallengeId(null); setEditingPlaylistId(null); setEditingGalleryId(null); setEditingPackageId(null);
+    setProgramForm(defaultProgramForm); setYogaTypeForm(defaultYogaTypeForm); setYogaChallengeForm(defaultYogaChallengeForm); setUserForm(defaultUserForm); setPaidUserForm(defaultPaidUserForm); setChallengeForm(defaultChallengeForm); setPlaylistForm(defaultPlaylistForm); setGalleryForm(defaultGalleryForm); setPackageForm(defaultPackageForm);
   };
 
   const openProgramModal = (program?: AdminYogaProgram) => { resetMessages(); setModalType('program'); setEditingProgramId(program?.id || null); setProgramForm(program ? toProgramForm(program) : defaultProgramForm); };
+  const openYogaTypeModal = (type?: AdminYogaType) => { resetMessages(); setModalType('yoga-type'); setEditingYogaTypeId(type?.id || null); setYogaTypeForm(type ? toYogaTypeForm(type) : defaultYogaTypeForm); };
   const openYogaChallengeModal = (challenge?: AdminYogaChallenge) => { resetMessages(); setModalType('yoga-challenge'); setEditingYogaChallengeId(challenge?.id || null); setYogaChallengeForm(challenge ? toYogaChallengeForm(challenge) : defaultYogaChallengeForm); };
   const openUserModal = (user: AdminManagedUser) => { resetMessages(); setModalType('user'); setEditingUserId(user.id); setUserForm(toUserForm(user)); };
   const openPaidUserModal = (user: AdminPaidUser) => { resetMessages(); setModalType('paid-user'); setEditingPaidUserId(user.id); setPaidUserForm(toPaidUserForm(user)); };
@@ -309,6 +340,19 @@ const AdminDashboard = () => {
     finally { setSavingSection(false); }
   };
 
+  const handleSiteSettingsSave = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!adminToken) return;
+    try {
+      setSavingSiteSettings(true); resetMessages();
+      const response = await adminApiClient.put<{ message: string; data: AdminSiteSettings }>('/api/content/site-settings', { data: siteSettings }, { headers: authHeaders });
+      setSiteSettings(response.data.data);
+      localStorage.setItem('siteContactSettings', JSON.stringify(response.data.data));
+      setSuccessMessage('Phone numbers updated successfully.');
+    } catch (err: unknown) { setError(getErrorMessage(err, 'Unable to update phone numbers.')); }
+    finally { setSavingSiteSettings(false); }
+  };
+
   const handleProgramSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!adminToken) return;
@@ -324,6 +368,35 @@ const AdminDashboard = () => {
       setSuccessMessage(editingProgramId ? 'Yoga program updated successfully.' : 'Yoga program added successfully.');
       closeModal();
     } catch (err: unknown) { setError(getErrorMessage(err, 'Unable to save yoga program.')); }
+    finally { setSubmitting(false); }
+  };
+
+  const handleYogaTypeSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!adminToken) return;
+    try {
+      setSubmitting(true); resetMessages();
+      const formData = new FormData();
+      Object.entries({
+        title: yogaTypeForm.title,
+        tagline: yogaTypeForm.tagline,
+        desc: yogaTypeForm.desc,
+        iconKey: yogaTypeForm.iconKey,
+        overview: yogaTypeForm.overview,
+        details: yogaTypeForm.details,
+        benefits: yogaTypeForm.benefits,
+        perfectFor: yogaTypeForm.perfectFor,
+        displayOrder: yogaTypeForm.displayOrder || '0',
+        isActive: String(yogaTypeForm.isActive),
+        imagePath: yogaTypeForm.image,
+      }).forEach(([key, value]) => formData.append(key, value));
+      if (yogaTypeForm.imageFile) formData.append('image', yogaTypeForm.imageFile);
+      const endpoint = editingYogaTypeId ? `/api/admin/yoga-types/${editingYogaTypeId}` : '/api/admin/yoga-types';
+      const response = await adminApiClient.request<{ data: AdminYogaType }>({ url: endpoint, method: editingYogaTypeId ? 'put' : 'post', data: formData, headers: { ...authHeaders, 'Content-Type': 'multipart/form-data' } });
+      setYogaTypes((previous) => (editingYogaTypeId ? previous.map((item) => item.id === editingYogaTypeId ? response.data.data : item) : [...previous, response.data.data]).sort((a, b) => a.displayOrder - b.displayOrder || a.title.localeCompare(b.title)));
+      setSuccessMessage(editingYogaTypeId ? 'Yoga type updated successfully.' : 'Yoga type added successfully.');
+      closeModal();
+    } catch (err: unknown) { setError(getErrorMessage(err, 'Unable to save yoga type.')); }
     finally { setSubmitting(false); }
   };
 
@@ -424,7 +497,7 @@ const AdminDashboard = () => {
     try {
       setSubmitting(true); resetMessages();
       const formData = new FormData();
-      Object.entries({ title: galleryForm.title, alt: galleryForm.alt, displayOrder: galleryForm.displayOrder || '0', isActive: String(galleryForm.isActive), imagePath: galleryForm.image }).forEach(([key, value]) => formData.append(key, value));
+      Object.entries({ title: galleryForm.title, alt: galleryForm.alt, category: galleryForm.category, displayOrder: galleryForm.displayOrder || '0', isActive: String(galleryForm.isActive), imagePath: galleryForm.image }).forEach(([key, value]) => formData.append(key, value));
       if (galleryForm.imageFile) formData.append('image', galleryForm.imageFile);
       const endpoint = editingGalleryId ? `/api/admin/gallery/${editingGalleryId}` : '/api/admin/gallery';
       const response = await adminApiClient.request<{ data: AdminGalleryImage }>({ url: endpoint, method: editingGalleryId ? 'put' : 'post', data: formData, headers: { ...authHeaders, 'Content-Type': 'multipart/form-data' } });
@@ -478,10 +551,33 @@ const AdminDashboard = () => {
     } catch (err: unknown) { setError(getErrorMessage(err, 'Unable to send reply.')); }
   };
 
+  const deleteChat = async (chat: AdminChatThread) => {
+    if (!adminToken || !window.confirm(`Delete chat for "${chat.userName}" and all its messages?`)) return;
+    try {
+      resetMessages();
+      const deletingSelected = selectedChatId === chat.id;
+      await adminApiClient.delete(`/api/admin/chats/${chat.id}`, { headers: authHeaders });
+      setChats((previous) => previous.filter((item) => item.id !== chat.id));
+      if (deletingSelected) {
+        const nextSelected = chats.find((item) => item.id !== chat.id)?.id || null;
+        setSelectedChatId(nextSelected);
+        setReplyText('');
+      }
+      setSuccessMessage('Chat deleted successfully.');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Unable to delete chat.'));
+    }
+  };
+
   const deleteProgram = async (program: AdminYogaProgram) => {
     if (!adminToken || !window.confirm(`Delete "${program.title}"?`)) return;
     try { resetMessages(); await adminApiClient.delete(`/api/admin/yoga-programs/${program.id}`, { headers: authHeaders }); setPrograms((previous) => previous.filter((item) => item.id !== program.id)); await refreshOverview(); setSuccessMessage('Yoga program deleted successfully.'); }
     catch (err: unknown) { setError(getErrorMessage(err, 'Unable to delete yoga program.')); }
+  };
+  const deleteYogaType = async (type: AdminYogaType) => {
+    if (!adminToken || !window.confirm(`Delete "${type.title}"?`)) return;
+    try { resetMessages(); await adminApiClient.delete(`/api/admin/yoga-types/${type.id}`, { headers: authHeaders }); setYogaTypes((previous) => previous.filter((item) => item.id !== type.id)); setSuccessMessage('Yoga type deleted successfully.'); }
+    catch (err: unknown) { setError(getErrorMessage(err, 'Unable to delete yoga type.')); }
   };
   const deleteYogaChallenge = async (challenge: AdminYogaChallenge) => {
     if (!adminToken || !window.confirm(`Delete "${challenge.title}"?`)) return;
@@ -526,6 +622,7 @@ const AdminDashboard = () => {
           <div className="admin-menu-label">Menu</div>
           <button type="button" className={`admin-menu-item ${activeView === 'dashboard' ? 'active' : ''}`} onClick={() => setView('dashboard')}><LayoutDashboard />Dashboard<ChevronRight className="arrow" /></button>
           <button type="button" className={`admin-menu-item ${activeView === 'yoga-programs' ? 'active' : ''}`} onClick={() => setView('yoga-programs')}><ClipboardList />Yoga Programs<ChevronRight className="arrow" /></button>
+          <button type="button" className={`admin-menu-item ${activeView === 'yoga-types' ? 'active' : ''}`} onClick={() => setView('yoga-types')}><Leaf />Yoga Types<ChevronRight className="arrow" /></button>
           <button type="button" className={`admin-menu-item ${activeView === 'yoga-challenges' ? 'active' : ''}`} onClick={() => setView('yoga-challenges')}><Target />Yoga Challenges<ChevronRight className="arrow" /></button>
           <button type="button" className={`admin-menu-item ${activeView === 'users' ? 'active' : ''}`} onClick={() => setView('users')}><Users />Users<ChevronRight className="arrow" /></button>
           <button type="button" className={`admin-menu-item ${activeView === 'paid-users' ? 'active' : ''}`} onClick={() => setView('paid-users')}><CreditCard />Paid Users<ChevronRight className="arrow" /></button>
@@ -534,8 +631,10 @@ const AdminDashboard = () => {
           <button type="button" className={`admin-menu-item ${activeView === 'gallery' ? 'active' : ''}`} onClick={() => setView('gallery')}><Images />Gallery<ChevronRight className="arrow" /></button>
           <button type="button" className={`admin-menu-item ${activeView === 'packages' ? 'active' : ''}`} onClick={() => setView('packages')}><Box />Packages<ChevronRight className="arrow" /></button>
           <button type="button" className={`admin-menu-item ${activeView === 'chats' ? 'active' : ''}`} onClick={() => setView('chats')}><MessageCircle />Chats<ChevronRight className="arrow" /></button>
+          <button type="button" className={`admin-menu-item ${activeView === 'settings' ? 'active' : ''}`} onClick={() => setView('settings')}><Settings2 />Settings<ChevronRight className="arrow" /></button>
           <div className="admin-menu-label" style={{ marginTop: 20 }}>Quick Add</div>
           <button type="button" className="admin-menu-item" onClick={() => openProgramModal()}><Plus />Yoga Program<ChevronRight className="arrow" /></button>
+          <button type="button" className="admin-menu-item" onClick={() => openYogaTypeModal()}><Plus />Yoga Type<ChevronRight className="arrow" /></button>
           <button type="button" className="admin-menu-item" onClick={() => openYogaChallengeModal()}><Plus />Yoga Challenge<ChevronRight className="arrow" /></button>
           <button type="button" className="admin-menu-item" onClick={() => openChallengeModal()}><Plus />WorkFit Problem<ChevronRight className="arrow" /></button>
           <button type="button" className="admin-menu-item" onClick={() => openPlaylistModal()}><Plus />Playlist<ChevronRight className="arrow" /></button>
@@ -576,6 +675,10 @@ const AdminDashboard = () => {
                 </>
               )}
 
+              {activeView === 'yoga-types' && (
+                <div className="admin-panel-card"><div className="admin-section-head"><div><h3>Yoga Types</h3><p>Manage the dedicated yoga type cards shown below the wellness programs section.</p></div><button type="button" className="admin-primary-button" onClick={() => openYogaTypeModal()}><Plus size={16} style={{ marginRight: 8 }} />Add Yoga Type</button></div><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Yoga Type</th><th>Description</th><th>Perfect For</th><th>Order</th><th>Status</th><th>Actions</th></tr></thead><tbody>{yogaTypes.length === 0 ? <tr><td colSpan={6} className="admin-muted">No yoga types found.</td></tr> : yogaTypes.map((type) => <tr key={type.id}><td><div className="admin-program-cell"><img src={resolveYogaImageUrl(type.image)} alt={type.title} /><div><div style={{ fontWeight: 700 }}>{type.title}</div><div className="admin-muted">{type.tagline}</div></div></div></td><td>{type.desc}</td><td>{type.perfectFor.slice(0, 3).join(', ') || 'Not set'}</td><td>{type.displayOrder}</td><td><span className={`admin-status-badge ${type.isActive ? 'active' : 'inactive'}`}>{type.isActive ? 'Active' : 'Inactive'}</span></td><td><div className="admin-button-row"><button type="button" className="admin-secondary-button" onClick={() => openYogaTypeModal(type)}><Pencil size={15} style={{ marginRight: 6 }} />Edit</button><button type="button" className="admin-danger-button" onClick={() => deleteYogaType(type)}><Trash2 size={15} style={{ marginRight: 6 }} />Delete</button></div></td></tr>)}</tbody></table></div></div>
+              )}
+
               {activeView === 'yoga-challenges' && (
                 <>
                   <div className="admin-panel-card">
@@ -608,7 +711,7 @@ const AdminDashboard = () => {
               )}
 
               {activeView === 'gallery' && (
-                <div className="admin-panel-card"><div className="admin-section-head"><div><h3>Gallery Images</h3><p>Upload public gallery pictures and control the dedicated gallery page.</p></div><button type="button" className="admin-primary-button" onClick={() => openGalleryModal()}><Plus size={16} style={{ marginRight: 8 }} />Add Gallery Image</button></div><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Image</th><th>Alt Text</th><th>Order</th><th>Status</th><th>Updated</th><th>Actions</th></tr></thead><tbody>{galleryImages.length === 0 ? <tr><td colSpan={6} className="admin-muted">No gallery images found.</td></tr> : galleryImages.map((image) => <tr key={image.id}><td><div className="admin-program-cell"><img src={resolveYogaImageUrl(image.image)} alt={image.title} /><div><div style={{ fontWeight: 700 }}>{image.title}</div><div className="admin-muted">{image.image}</div></div></div></td><td>{image.alt || image.title}</td><td>{image.displayOrder}</td><td><span className={`admin-status-badge ${image.isActive ? 'active' : 'inactive'}`}>{image.isActive ? 'Active' : 'Inactive'}</span></td><td>{formatDate(image.updatedAt)}</td><td><div className="admin-button-row"><button type="button" className="admin-secondary-button" onClick={() => openGalleryModal(image)}><Pencil size={15} style={{ marginRight: 6 }} />Edit</button><button type="button" className="admin-danger-button" onClick={() => deleteGalleryImage(image)}><Trash2 size={15} style={{ marginRight: 6 }} />Delete</button></div></td></tr>)}</tbody></table></div></div>
+                <div className="admin-panel-card"><div className="admin-section-head"><div><h3>Gallery Images</h3><p>Upload categorized public gallery pictures and control the dedicated gallery page.</p></div><button type="button" className="admin-primary-button" onClick={() => openGalleryModal()}><Plus size={16} style={{ marginRight: 8 }} />Add Gallery Image</button></div><div className="admin-table-wrap"><table className="admin-table"><thead><tr><th>Image</th><th>Category</th><th>Alt Text</th><th>Order</th><th>Status</th><th>Actions</th></tr></thead><tbody>{galleryImages.length === 0 ? <tr><td colSpan={6} className="admin-muted">No gallery images found.</td></tr> : galleryImages.map((image) => <tr key={image.id}><td><div className="admin-program-cell"><img src={resolveYogaImageUrl(image.image)} alt={image.title} /><div><div style={{ fontWeight: 700 }}>{image.title}</div><div className="admin-muted">{image.image}</div></div></div></td><td><span className="admin-status-badge active">{image.category || 'Picture Gallery'}</span></td><td>{image.alt || image.title}</td><td>{image.displayOrder}</td><td><span className={`admin-status-badge ${image.isActive ? 'active' : 'inactive'}`}>{image.isActive ? 'Active' : 'Inactive'}</span></td><td><div className="admin-button-row"><button type="button" className="admin-secondary-button" onClick={() => openGalleryModal(image)}><Pencil size={15} style={{ marginRight: 6 }} />Edit</button><button type="button" className="admin-danger-button" onClick={() => deleteGalleryImage(image)}><Trash2 size={15} style={{ marginRight: 6 }} />Delete</button></div></td></tr>)}</tbody></table></div></div>
               )}
 
               {activeView === 'packages' && (
@@ -625,12 +728,41 @@ const AdminDashboard = () => {
                   </form>
                   <div className="admin-chat-grid">
                     <div className="admin-chat-list">
-                      {chats.length === 0 ? <div className="admin-muted">No chats yet.</div> : chats.map((chat) => <button type="button" key={chat.id} className={`admin-chat-list-item ${selectedChatId === chat.id ? 'active' : ''}`} onClick={() => setSelectedChatId(chat.id)}><strong>{chat.userName}</strong><span>{chat.email || 'No email'}</span><small>{chat.messages[chat.messages.length - 1]?.text || 'No messages yet'}</small></button>)}
+                      {chats.length === 0 ? <div className="admin-muted">No chats yet.</div> : chats.map((chat) => (
+                        <div key={chat.id} className={`admin-chat-list-item ${selectedChatId === chat.id ? 'active' : ''}`}>
+                          <button type="button" className="admin-chat-list-item-main" onClick={() => setSelectedChatId(chat.id)}>
+                            <strong>{chat.userName}</strong>
+                            <span>{chat.email || 'No email'}</span>
+                            <small>{chat.messages[chat.messages.length - 1]?.text || 'No messages yet'}</small>
+                          </button>
+                          <button type="button" className="admin-chat-delete-button" onClick={() => deleteChat(chat)} aria-label={`Delete chat for ${chat.userName}`} title="Delete chat">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      ))}
                     </div>
                     <div className="admin-chat-panel">
                       {selectedChat ? <><div className="admin-chat-head"><div><h3>{selectedChat.userName}</h3><p>{selectedChat.email} {selectedChat.phone ? `| ${selectedChat.phone}` : ''}</p></div><span className="admin-status-badge active">{selectedChat.messages.length} messages</span></div><div className="admin-chat-messages">{selectedChat.messages.map((message) => <div key={message.id} className={`admin-chat-bubble ${message.sender === 'user' ? 'user' : 'admin'}`}><p>{message.text}</p><small>{message.sender === 'system' ? 'Auto reply' : message.sender} | {formatDate(message.createdAt)}</small></div>)}</div><form onSubmit={sendAdminReply} className="admin-chat-reply"><input value={replyText} onChange={(event) => setReplyText(event.target.value)} placeholder="Type admin reply" /><button type="submit" className="admin-primary-button"><Send size={15} style={{ marginRight: 8 }} />Reply</button></form></> : <div className="admin-muted">Select a user chat to reply.</div>}
                     </div>
                   </div>
+                </div>
+              )}
+
+              {activeView === 'settings' && (
+                <div className="admin-panel-card">
+                  <div className="admin-section-head">
+                    <div>
+                      <h3>Phone Settings</h3>
+                      <p>Update the LiveFit and WorkFit contact numbers used across the footer and WhatsApp buttons.</p>
+                    </div>
+                  </div>
+                  <form onSubmit={handleSiteSettingsSave} className="admin-form-grid">
+                    <Field label="LiveFit Phone"><input value={siteSettings.livefitPhone} onChange={(event) => setSiteSettings((previous) => ({ ...previous, livefitPhone: event.target.value }))} placeholder="+91 9890008742" required /></Field>
+                    <Field label="WorkFit Phone"><input value={siteSettings.workfitPhone} onChange={(event) => setSiteSettings((previous) => ({ ...previous, workfitPhone: event.target.value }))} placeholder="+1 9256602776" required /></Field>
+                    <div className="admin-modal-actions" style={{ padding: '18px 0 0' }}>
+                      <button type="submit" className="admin-primary-button" disabled={savingSiteSettings}><Save size={16} style={{ marginRight: 8 }} />{savingSiteSettings ? 'Saving...' : 'Save Phone Numbers'}</button>
+                    </div>
+                  </form>
                 </div>
               )}
             </>
@@ -652,6 +784,23 @@ const AdminDashboard = () => {
           <Field label="Status"><select value={String(programForm.isActive)} onChange={(event) => setProgramForm((previous) => ({ ...previous, isActive: event.target.value === 'true' }))}><option value="true">Active</option><option value="false">Inactive</option></select></Field>
           <ImagePreview src={programPreview} alt={programForm.title || 'Program preview'} />
         </div></div><ModalActions submitting={submitting} editing={!!editingProgramId} createLabel="Create Yoga Program" updateLabel="Update Yoga Program" onCancel={closeModal} /></form></div></div>
+      )}
+
+      {modalType === 'yoga-type' && (
+        <div className="admin-modal-overlay" onClick={closeModal}><div className="admin-modal" onClick={(event) => event.stopPropagation()}><ModalHeader title={editingYogaTypeId ? 'Edit Yoga Type' : 'Add Yoga Type'} subtitle="Control the dedicated Yoga Types section below public wellness program cards." onClose={closeModal} /><form onSubmit={handleYogaTypeSubmit}><div className="admin-modal-body"><div className="admin-form-grid">
+          <Field label="Yoga Type Title"><input value={yogaTypeForm.title} onChange={(event) => setYogaTypeForm((previous) => ({ ...previous, title: event.target.value }))} required /></Field>
+          <Field label="Tagline"><input value={yogaTypeForm.tagline} onChange={(event) => setYogaTypeForm((previous) => ({ ...previous, tagline: event.target.value }))} required /></Field>
+          <Field label="Short Description" full><textarea value={yogaTypeForm.desc} onChange={(event) => setYogaTypeForm((previous) => ({ ...previous, desc: event.target.value }))} required /></Field>
+          <Field label="Icon"><select value={yogaTypeForm.iconKey} onChange={(event) => setYogaTypeForm((previous) => ({ ...previous, iconKey: event.target.value }))}>{iconOptions.map((option) => <option key={option} value={option}>{option}</option>)}</select></Field>
+          <Field label="Display Order"><input type="number" min="0" value={yogaTypeForm.displayOrder} onChange={(event) => setYogaTypeForm((previous) => ({ ...previous, displayOrder: event.target.value }))} /></Field>
+          <Field label="Overview" full><textarea value={yogaTypeForm.overview} onChange={(event) => setYogaTypeForm((previous) => ({ ...previous, overview: event.target.value }))} required /></Field>
+          <Field label="Details" full><textarea value={yogaTypeForm.details} onChange={(event) => setYogaTypeForm((previous) => ({ ...previous, details: event.target.value }))} required /></Field>
+          <Field label="Benefits" full><textarea value={yogaTypeForm.benefits} onChange={(event) => setYogaTypeForm((previous) => ({ ...previous, benefits: event.target.value }))} placeholder="Enter one benefit per line" required /></Field>
+          <Field label="Perfect For" full><textarea value={yogaTypeForm.perfectFor} onChange={(event) => setYogaTypeForm((previous) => ({ ...previous, perfectFor: event.target.value }))} placeholder="Enter one audience or use case per line" /></Field>
+          <Field label="Upload Photo"><input type="file" accept="image/*" onChange={(event) => setYogaTypeForm((previous) => ({ ...previous, imageFile: event.target.files?.[0] || null }))} /></Field>
+          <Field label="Status"><select value={String(yogaTypeForm.isActive)} onChange={(event) => setYogaTypeForm((previous) => ({ ...previous, isActive: event.target.value === 'true' }))}><option value="true">Active</option><option value="false">Inactive</option></select></Field>
+          <ImagePreview src={yogaTypePreview} alt={yogaTypeForm.title || 'Yoga type preview'} />
+        </div></div><ModalActions submitting={submitting} editing={!!editingYogaTypeId} createLabel="Create Yoga Type" updateLabel="Update Yoga Type" onCancel={closeModal} /></form></div></div>
       )}
 
       {modalType === 'yoga-challenge' && (
@@ -723,6 +872,7 @@ const AdminDashboard = () => {
       {modalType === 'gallery' && (
         <div className="admin-modal-overlay" onClick={closeModal}><div className="admin-modal" onClick={(event) => event.stopPropagation()}><ModalHeader title={editingGalleryId ? 'Edit Gallery Image' : 'Add Gallery Image'} subtitle="Upload photos for the dedicated public gallery page." onClose={closeModal} /><form onSubmit={handleGallerySubmit}><div className="admin-modal-body"><div className="admin-form-grid">
           <Field label="Title"><input value={galleryForm.title} onChange={(event) => setGalleryForm((previous) => ({ ...previous, title: event.target.value }))} required /></Field>
+          <Field label="Category"><select value={galleryForm.category} onChange={(event) => setGalleryForm((previous) => ({ ...previous, category: event.target.value }))}><option value="Meditation Library">Meditation Library</option><option value="Practice Library">Practice Library</option><option value="Picture Gallery">Picture Gallery</option></select></Field>
           <Field label="Display Order"><input type="number" min="0" value={galleryForm.displayOrder} onChange={(event) => setGalleryForm((previous) => ({ ...previous, displayOrder: event.target.value }))} /></Field>
           <Field label="Alt Text" full><input value={galleryForm.alt} onChange={(event) => setGalleryForm((previous) => ({ ...previous, alt: event.target.value }))} placeholder="Describe the image for accessibility" /></Field>
           <Field label="Upload Photo"><input type="file" accept="image/*" onChange={(event) => setGalleryForm((previous) => ({ ...previous, imageFile: event.target.files?.[0] || null }))} /></Field>
