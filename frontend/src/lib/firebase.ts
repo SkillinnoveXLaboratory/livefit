@@ -1,8 +1,10 @@
 import { initializeApp } from 'firebase/app';
 import {
+  EmailAuthProvider,
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   getAuth,
+  linkWithCredential,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -62,6 +64,23 @@ export const signInWithGoogle = async () => {
 
   const credentials = await signInWithPopup(firebaseAuth, googleProvider);
   return credentials.user;
+};
+
+export const linkGoogleUserWithPassword = async (email: string, password: string) => {
+  if (!firebaseAuth?.currentUser) {
+    throw new Error('Google account is not signed in');
+  }
+
+  const trimmedEmail = String(email || '').trim();
+  const trimmedPassword = String(password || '').trim();
+
+  if (!trimmedEmail || !trimmedPassword) {
+    throw new Error('Email and password are required');
+  }
+
+  const credential = EmailAuthProvider.credential(trimmedEmail, trimmedPassword);
+  const response = await linkWithCredential(firebaseAuth.currentUser, credential);
+  return response.user;
 };
 
 export const signOutFirebaseUser = async () => {

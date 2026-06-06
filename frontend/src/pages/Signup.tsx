@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FirebaseError } from 'firebase/app';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { getSafeRedirectPath } from '../config/auth';
-import { createFirebaseUser, signInWithGoogle, signOutFirebaseUser } from '../lib/firebase';
+import { createFirebaseUser, linkGoogleUserWithPassword, signInWithGoogle, signOutFirebaseUser } from '../lib/firebase';
 import { syncFirebaseSession } from '../lib/firebaseSession';
 import { apiClient } from '../lib/api';
 
@@ -173,14 +173,20 @@ const Signup = () => {
     setNotice('');
 
     try {
-      const auth = await syncFirebaseSession(pendingGoogleUser, {
+      const linkedUser = await linkGoogleUserWithPassword(
+        pendingGoogleUser.email || '',
+        googleDetails.password
+      );
+
+      const auth = await syncFirebaseSession(linkedUser, {
         role,
         phone: googleDetails.phone.trim(),
         password: googleDetails.password,
-        name: pendingGoogleUser.displayName || formData.name.trim(),
+        name: linkedUser.displayName || pendingGoogleUser.displayName || formData.name.trim(),
       });
       navigate(nextPath || (auth.user.role === 'workfit' ? '/workfit' : '/'));
     } catch (err: unknown) {
+      await signOutFirebaseUser().catch(() => undefined);
       setError(getFirebaseMessage(err));
     } finally {
       setGoogleLoading(false);
