@@ -362,14 +362,14 @@ const Navigation = () => {
               whileHover={{ scale: 1.05, boxShadow: '0 20px 40px -10px rgba(249, 115, 22, 0.25)' }}
               whileTap={{ scale: 0.95 }}
               onClick={goToConsultation}
-              className="group relative flex items-center rounded-full bg-orange-600 pl-16 pr-8 py-5 text-xs font-black uppercase tracking-[0.3em] text-white shadow-xl shadow-orange-100 transition-all"
+              className="group relative flex items-center rounded-full bg-orange-600 pl-14 pr-7 py-4 text-[11px] font-black uppercase tracking-[0.24em] text-white shadow-xl shadow-orange-100 transition-all lg:pl-14 lg:pr-7 lg:py-4 lg:text-[11px] xl:pl-16 xl:pr-8 xl:py-5 xl:text-xs xl:tracking-[0.3em]"
             >
-              <div className="absolute left-2 top-2 bottom-2 aspect-square rounded-full bg-white transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:left-[calc(100%-3rem)]">
+              <div className="absolute left-1.5 top-1.5 bottom-1.5 aspect-square rounded-full bg-white transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:left-[calc(100%-3rem)]">
                 <div className="flex h-full w-full items-center justify-center">
-                  <ChevronRight className="h-5 w-5 text-orange-600" />
+                  <ChevronRight className="h-4 w-4 text-orange-600 xl:h-5 xl:w-5" />
                 </div>
               </div>
-              <span className="relative z-10 transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:-translate-x-6">
+              <span className="relative z-10 transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:-translate-x-5 xl:group-hover:-translate-x-6">
                 Book a Demo
               </span>
             </motion.button>

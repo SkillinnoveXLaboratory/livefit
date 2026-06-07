@@ -521,42 +521,26 @@ const WorkFit = () => {
       badge: 'CORPORATE WELLNESS PLATFORM',
       badgeStyle: 'text',
       titleChunks: [
-        { orange: 'Move', dark: ' Better.' },
-        { orange: 'Feel', dark: ' Better.' },
-        { orange: 'Work', dark: ' Better.' }
+        { text: 'Move Together.' },
+        { text: 'Work Better.' }
       ],
-      description: 'Yoga, mindfulness, fitness, nutrition and healthy habit programs designed to energize your teams-wherever they work, wherever they are.',
+      description: 'Yoga, Stretch at Desk & Workouts for a Stronger You.',
+      listFeatures: [
+        { icon: Flower2, title: 'Yoga for Balance', desc: 'Relieve stress, improve flexibility\nand focus.' },
+        { icon: Armchair, title: 'Stretch at Desk', desc: 'Quick stretches to ease tension\nand improve posture.' },
+        { icon: Dumbbell, title: 'Workouts for Strength', desc: 'Build strength, boost energy\nand stay healthy.' },
+      ],
+      tagline: 'Small moves. Big impact. Every day.',
       primaryButtonText: 'Book a Demo',
       secondaryButtonText: 'Explore Solutions',
       buttonStyle: 'screenshot'
     },
     {
       image: '/images/wh2.webp',
-      theme: 'dark',
-      iconBadge: true,
-      iconColor: 'bg-[#f97316]',
-      badgeColor: 'text-[#f97316]',
-      IconComponent: Flower2,
-      titleChunks: [
-        { text: 'Move Together.' },
-        { text: 'Work ', orange: 'Better.' }
-      ],
-      description: 'Yoga, Stretch at Desk & Workouts\nfor a Stronger You.',
-      listAccent: '#f97316',
-      listFeatures: [
-        { icon: Flower2, title: 'Yoga for Balance', desc: 'Relieve stress, improve flexibility\nand focus.' },
-        { icon: Armchair, title: 'Stretch at Desk', desc: 'Quick stretches to ease tension\nand improve posture.' },
-        { icon: Dumbbell, title: 'Workouts for Strength', desc: 'Build strength, boost energy\nand stay healthy.' },
-      ],
-      tagline: 'Small moves. Big impact. Every day.'
-    },
-    {
-      image: '/images/wh3.webp',
-      theme: 'dark',
       iconBadge: true,
       iconColor: 'bg-[#3b82f6]',
       badgeColor: 'text-[#3b82f6]',
-      IconComponent: Flower2,
+      IconComponent: HeartPulse,
       title: ['Mind. Calm. Focused.'],
       subtitle: 'Mental & Emotional Wellbeing for Your Team',
       description: 'Support your team\'s mental and emotional wellbeing with expert-led sessions and resources that truly make a difference.',
@@ -568,7 +552,7 @@ const WorkFit = () => {
       tagline: 'Stronger minds. Happier teams. Better workplaces.'
     },
     {
-      image: '/images/wh4.webp',
+      image: '/images/wh3.webp',
       theme: 'dark',
       iconBadge: true,
       iconColor: 'bg-[#22c55e]',
@@ -591,6 +575,7 @@ const WorkFit = () => {
         {
           title: 'Mental Wellbeing Challenges',
           color: '#22c55e',
+          fullWidth: true,
           items: [
             { icon: Flower2, title: 'Mindfulness Challenge', desc: 'Pause, breathe and stay present together.' },
             { icon: Smile, title: 'Gratitude Challenge', desc: 'Spread positivity. Build a culture of appreciation.' },
@@ -600,6 +585,7 @@ const WorkFit = () => {
         {
           title: 'Team Programs',
           color: '#22c55e',
+          fullWidth: true,
           items: [
             { icon: Users2, title: 'Team Wellness Program', desc: 'Holistic wellbeing plans tailored for your team.' },
             { icon: UserCircle2, title: 'Wellness Workshops', desc: 'Interactive sessions on fitness, nutrition, stress management & more.' },
@@ -610,10 +596,10 @@ const WorkFit = () => {
       tagline: 'Better habits. Stronger teams. Healthier workplaces.'
     },
     {
-      image: '/images/wh5.webp',
+      image: '/images/wh4.webp',
       theme: 'dark',
       iconBadge: true,
-      iconColor: 'bg-[#3b82f6]', // Clear blue as requested
+      iconColor: 'bg-[#3b82f6]',
       badgeColor: 'text-[#3b82f6]',
       IconComponent: Apple,
       title: ['Healthy Habits'],
@@ -630,12 +616,9 @@ const WorkFit = () => {
       tagline: 'Healthy people. Positive culture. Better performance.'
     }
   ];
-  const heroSlides = slides.slice(0, 5).map((slide) => ({
-    ...slides[0],
-    image: slide.image,
-  }));
-  const heroContent = heroSlides[0] ?? heroSlides[currentSlide];
-  const activeHeroSlide = heroSlides[currentSlide] ?? heroContent;
+  const heroSlides = slides;
+  const heroContent = heroSlides[currentSlide] ?? heroSlides[0];
+  const activeHeroSlide = heroContent;
     const countryFlagMap: Record<string, string> = {
     USA: '\uD83C\uDDFA\uD83C\uDDF8',
     UK: '\uD83C\uDDEC\uD83C\uDDE7',
@@ -711,7 +694,7 @@ const WorkFit = () => {
   return (
     <div ref={containerRef} className="pb-0 overflow-hidden bg-[#0a1128] pt-24 md:pt-27">
       {/* Hero */}
-      <section id="workfit-hero" className="relative min-h-[900px] md:min-h-[860px] lg:h-[calc(100vh-5rem)] lg:min-h-[760px] flex items-center overflow-hidden bg-[#07101d]">
+      <section id="workfit-hero" className="relative min-h-[980px] md:min-h-[920px] lg:min-h-[1080px] xl:min-h-[1120px] flex items-center overflow-hidden bg-[#07101d]">
         {/* Background Image Layer */}
         <div className="absolute inset-0 z-0">
           <AnimatePresence initial={false}>
@@ -735,7 +718,7 @@ const WorkFit = () => {
 
         <div className="w-full h-full max-w-[1480px] mx-auto px-5 md:px-10 lg:px-16 relative z-20 pt-10 pb-24 lg:pt-0 lg:pb-0">
           <div className="grid h-full grid-cols-1 items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="relative max-w-2xl text-left rounded-[2.5rem] border border-white/10 bg-white/[0.07] p-6 shadow-[0_30px_100px_rgba(0,0,0,0.28)] backdrop-blur-xl md:p-9 lg:h-[650px] lg:overflow-y-auto lg:p-10">
+          <div className="relative max-w-2xl text-left rounded-[2.5rem] border border-white/10 bg-white/[0.07] p-6 shadow-[0_30px_100px_rgba(0,0,0,0.28)] backdrop-blur-xl md:p-9 lg:min-h-[800px] lg:p-10">
             <div className="absolute -left-3 top-10 hidden h-24 w-1 rounded-full bg-gradient-to-b from-orange-400 to-amber-300 lg:block" />
             <motion.div
               initial={{ opacity: 0 }}
@@ -971,13 +954,13 @@ const WorkFit = () => {
             </motion.div>
           </div>
           <motion.div
-            className="relative hidden h-[650px] lg:block"
+            className="relative min-h-[380px] sm:min-h-[460px] lg:min-h-[800px]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
           >
-            <div className="absolute left-10 top-8 h-32 w-32 rounded-full bg-orange-400/20 blur-3xl" />
-            <div className="absolute right-2 top-12 h-[34rem] w-[82%] rotate-2 overflow-hidden rounded-[3.5rem] border border-white/12 bg-white/10 p-3 shadow-[0_45px_120px_rgba(0,0,0,0.38)] backdrop-blur-xl">
+            <div className="absolute left-4 top-4 h-20 w-20 rounded-full bg-orange-400/20 blur-3xl sm:left-10 sm:top-8 sm:h-32 sm:w-32" />
+            <div className="absolute inset-x-0 top-8 mx-auto h-[320px] w-full max-w-[420px] overflow-hidden rounded-[2rem] border border-white/12 bg-white/10 p-2 shadow-[0_25px_80px_rgba(0,0,0,0.34)] backdrop-blur-xl sm:top-10 sm:h-[380px] sm:max-w-[520px] lg:right-2 lg:top-12 lg:h-[34rem] lg:w-[82%] lg:max-w-none lg:rotate-2 lg:rounded-[3.5rem] lg:p-3 lg:shadow-[0_45px_120px_rgba(0,0,0,0.38)]">
               <div className="relative h-full overflow-hidden rounded-[2.8rem]">
                 <AnimatePresence initial={false}>
                   <motion.img
@@ -992,21 +975,13 @@ const WorkFit = () => {
                   />
                 </AnimatePresence>
                 <div className="absolute inset-0 bg-gradient-to-t from-[#07101d]/76 via-transparent to-transparent" />
-                <div className="absolute bottom-8 left-8 right-8 rounded-[2rem] border border-white/15 bg-white/12 p-5 text-white backdrop-blur-xl">
-                  <p className="text-[10px] font-black uppercase tracking-[0.32em] text-orange-200">Corporate Wellness</p>
-                  <p className="mt-2 text-2xl font-black leading-tight">Designed for teams that need energy, calm, and momentum.</p>
+                <div className="absolute bottom-4 left-4 right-4 rounded-[1.5rem] border border-white/15 bg-white/12 p-4 text-white backdrop-blur-xl sm:bottom-8 sm:left-8 sm:right-8 sm:rounded-[2rem] sm:p-5">
+                  <p className="text-[9px] font-black uppercase tracking-[0.28em] text-orange-200 sm:text-[10px] sm:tracking-[0.32em]">Corporate Wellness</p>
+                  <p className="mt-2 text-lg font-black leading-tight sm:text-2xl">Designed for teams that need energy, calm, and momentum.</p>
                 </div>
               </div>
             </div>
-            <div className="absolute left-0 top-24 rounded-[2rem] border border-white/12 bg-white/12 p-5 text-white shadow-2xl backdrop-blur-xl">
-              <div className="text-4xl font-black text-orange-300">87</div>
-              <div className="mt-1 text-[10px] font-black uppercase tracking-[0.26em] text-white/60">Wellness Score</div>
-            </div>
-            <div className="absolute bottom-20 left-8 rounded-[2rem] border border-white/12 bg-[#07101d]/72 p-5 text-white shadow-2xl backdrop-blur-xl">
-              <div className="text-sm font-black">Live + On-demand</div>
-              <div className="mt-1 text-xs text-white/55">Built for every time zone</div>
-            </div>
-            <div className="absolute bottom-7 right-0 rounded-[2rem] border border-orange-300/20 bg-orange-400/15 p-5 text-white shadow-2xl backdrop-blur-xl">
+            <div className="absolute bottom-2 right-2 rounded-[1.5rem] border border-orange-300/20 bg-orange-400/15 p-4 text-white shadow-2xl backdrop-blur-xl sm:bottom-7 sm:right-0 sm:rounded-[2rem] sm:p-5">
               <div className="text-sm font-black">Smooth adoption</div>
               <div className="mt-1 text-xs text-white/60">Programs people actually join</div>
             </div>

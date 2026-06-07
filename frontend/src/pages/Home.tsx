@@ -30,7 +30,7 @@ const Home = () => {
         <div id="one-on-one-coaching">
           <IndividualClasses />
         </div>
-        <div id="live-group-zoom">
+        <div id="zoom-sessions">
           <GroupClasses />
         </div>
         <div id="wellness-programs">

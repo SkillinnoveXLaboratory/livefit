@@ -308,6 +308,58 @@ const Hero = () => {
         </div>
       </div>
 
+      <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-4 md:gap-6 bg-[#2B2D42] text-white/90 px-4 py-2 md:px-6 md:py-3 rounded-full shadow-2xl backdrop-blur-md">
+        <button
+          type="button"
+          onClick={handlePrev}
+          className="hover:text-white transition-colors p-1 text-base md:text-lg"
+          aria-label="Previous slide"
+        >
+          <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsPaused((value) => !value)}
+          className="hover:text-orange-400 text-orange-500 transition-colors flex items-center justify-center p-1"
+          aria-label={isPaused ? 'Resume slideshow' : 'Pause slideshow'}
+        >
+          {isPaused ? <Play className="w-4 h-4 md:w-[18px] md:h-[18px]" /> : <Pause className="w-4 h-4 md:w-[18px] md:h-[18px]" />}
+        </button>
+        <button
+          type="button"
+          onClick={handleNext}
+          className="hover:text-white transition-colors p-1 text-base md:text-lg"
+          aria-label="Next slide"
+        >
+          <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
+        </button>
+      </div>
+
+      <div className="hidden sm:flex absolute bottom-20 md:bottom-24 left-1/2 -translate-x-1/2 z-30 items-center gap-4">
+        {slides.map((_, idx) => {
+          const isActive = idx === currentSlide;
+          const activeWidth = isActive ? `${Math.max(6, Math.min(100, progress))}%` : '0%';
+
+          return (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => {
+                setCurrentSlide(idx);
+                setProgress(0);
+              }}
+              className="relative w-16 h-1 bg-slate-200/90 rounded-full overflow-hidden cursor-pointer backdrop-blur-sm shadow-sm"
+              aria-label={`Go to slide ${idx + 1}`}
+            >
+              <div
+                className="absolute inset-y-0 left-0 bg-orange-500 transition-all duration-150"
+                style={{ width: activeWidth }}
+              />
+            </button>
+          );
+        })}
+      </div>
+
       <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-orange-200/20 rounded-full blur-[150px] -z-10" />
     </section>
   );

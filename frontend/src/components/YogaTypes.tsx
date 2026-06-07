@@ -143,7 +143,7 @@ const YogaTypes = () => {
       <div className="relative w-full px-4 md:px-8 lg:px-20">
         <div className="mx-auto mb-14 max-w-3xl text-center">
           <p className="mb-3 text-xs font-black uppercase tracking-[0.35em] text-orange-500">Yoga Types</p>
-          <h2 className="mb-4 font-serif text-4xl font-bold md:text-5xl">Choose the Practice That Fits You</h2>
+          <h2 className="mb-4 font-serif text-4xl font-bold md:text-5xl">Our programs Powered by Different Yoga Styles</h2>
           <p className="text-lg font-medium leading-relaxed text-slate-500">
             Explore every yoga style, training format, and mindful practice available through LiveFit.
           </p>
