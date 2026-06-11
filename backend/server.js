@@ -25,6 +25,10 @@ const { defaultWorkfitChallenges } = require('./data/defaultWorkfitChallenges');
 const { defaultYogaChallenges, yogaChallengesSection } = require('./data/defaultYogaChallenges');
 const { defaultYogaTypes } = require('./data/defaultYogaTypes');
 
+const defaultWorkfitHeroContent = {
+  images: ['/images/wh1.webp', '/images/wh2.webp', '/images/wh3.webp', '/images/wh4.webp'],
+};
+
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -938,6 +942,16 @@ function sanitizeGalleryImage(item) {
   };
 }
 
+function sanitizeWorkfitHeroContent(content) {
+  const images = Array.isArray(content?.images) && content.images.length > 0
+    ? content.images.map((image) => String(image || '').trim()).filter(Boolean)
+    : defaultWorkfitHeroContent.images.slice();
+
+  return {
+    images: images.length > 0 ? images : defaultWorkfitHeroContent.images.slice(),
+  };
+}
+
 function sanitizeChatThread(thread) {
   return {
     id: thread._id,
@@ -1268,6 +1282,16 @@ async function seedDefaultYogaProgramsIfNeeded() {
         updatedAt: new Date(),
       });
       console.log('Seeded default yoga-challenges-section content.');
+    }
+
+    const existingWorkfitHeroContent = await Content.findOne({ page: 'workfit-hero' });
+    if (!existingWorkfitHeroContent) {
+      await Content.create({
+        page: 'workfit-hero',
+        data: defaultWorkfitHeroContent,
+        updatedAt: new Date(),
+      });
+      console.log('Seeded default workfit-hero content.');
     }
 
     const existingPackageCount = await Package.countDocuments();
@@ -3349,6 +3373,8 @@ app.get('/api/content/:page', async (req, res) => {
         defaultData = yogaProgramsSection;
       } else if (page === 'yoga-challenges-section') {
         defaultData = yogaChallengesSection;
+      } else if (page === 'workfit-hero') {
+        defaultData = defaultWorkfitHeroContent;
       } else if (page === 'site-settings') {
         defaultData = {
           livefitPhone: '+91 9890008742',
@@ -3391,6 +3417,69 @@ app.put('/api/content/:page', async (req, res) => {
     res.status(err.statusCode || 500).json({ message: err.message || 'Failed to update content' });
   }
 });
+
+app.get('/api/admin/workfit-hero', async (req, res) => {
+  try {
+    requireAdminAccess(req);
+    const content = await Content.findOne({ page: 'workfit-hero' });
+    res.json(sanitizeWorkfitHeroContent(content?.data));
+  } catch (err) {
+    console.error('Error fetching WorkFit hero content:', err);
+    res.status(err.statusCode || 500).json({ message: err.message || 'Failed to fetch WorkFit hero content' });
+  }
+});
+
+app.put(
+  '/api/admin/workfit-hero',
+  upload.fields([
+    { name: 'slide0', maxCount: 1 },
+    { name: 'slide1', maxCount: 1 },
+    { name: 'slide2', maxCount: 1 },
+    { name: 'slide3', maxCount: 1 },
+  ]),
+  async (req, res) => {
+    try {
+      requireAdminAccess(req);
+
+      const existingContent = await Content.findOne({ page: 'workfit-hero' });
+      const currentImages = sanitizeWorkfitHeroContent(existingContent?.data).images;
+      const nextImages = currentImages.slice(0, defaultWorkfitHeroContent.images.length);
+
+      for (let index = 0; index < defaultWorkfitHeroContent.images.length; index += 1) {
+        const file = req.files?.[`slide${index}`]?.[0];
+        if (!file) {
+          continue;
+        }
+
+        const previousImage = nextImages[index];
+        const uploadedImage = await convertUploadToWebp(file, `workfit-hero-${index + 1}`);
+        nextImages[index] = uploadedImage;
+
+        if (previousImage && previousImage !== defaultWorkfitHeroContent.images[index]) {
+          removeUploadedFile(previousImage);
+        }
+      }
+
+      while (nextImages.length < defaultWorkfitHeroContent.images.length) {
+        nextImages.push(defaultWorkfitHeroContent.images[nextImages.length]);
+      }
+
+      const updatedContent = await Content.findOneAndUpdate(
+        { page: 'workfit-hero' },
+        {
+          data: { images: nextImages.slice(0, defaultWorkfitHeroContent.images.length) },
+          updatedAt: new Date(),
+        },
+        { returnDocument: 'after', upsert: true }
+      );
+
+      res.json({ message: 'WorkFit hero content updated successfully', data: sanitizeWorkfitHeroContent(updatedContent.data) });
+    } catch (err) {
+      console.error('Error updating WorkFit hero content:', err);
+      res.status(err.statusCode || 500).json({ message: err.message || 'Failed to update WorkFit hero content' });
+    }
+  }
+);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 

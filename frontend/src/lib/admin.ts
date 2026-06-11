@@ -86,6 +86,10 @@ export type AdminYogaChallengesSectionContent = {
   quote: string;
 };
 
+export type AdminWorkfitHeroContent = {
+  images: string[];
+};
+
 export type AdminSiteSettings = {
   livefitPhone: string;
   workfitPhone: string;

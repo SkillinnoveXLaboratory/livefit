@@ -23,6 +23,7 @@ import {
   type AdminSiteSettings,
   type AdminUsersResponse,
   type AdminWorkfitChallenge,
+  type AdminWorkfitHeroContent,
   type AdminYogaChallenge,
   type AdminYogaChallengesSectionContent,
   type AdminYogaProgram,
@@ -30,7 +31,7 @@ import {
 } from '../lib/admin';
 import { resolveYogaImageUrl } from '../lib/yogaPrograms';
 
-type View = 'dashboard' | 'yoga-programs' | 'yoga-types' | 'yoga-challenges' | 'users' | 'paid-users' | 'workfit-challenges' | 'playlists' | 'gallery' | 'packages' | 'chats' | 'settings';
+type View = 'dashboard' | 'workfit-hero' | 'yoga-programs' | 'yoga-types' | 'yoga-challenges' | 'users' | 'paid-users' | 'workfit-challenges' | 'playlists' | 'gallery' | 'packages' | 'chats' | 'settings';
 type ModalType = 'program' | 'yoga-type' | 'yoga-challenge' | 'user' | 'paid-user' | 'challenge' | 'playlist' | 'gallery' | 'package' | null;
 
 type ProgramForm = { title: string; tagline: string; desc: string; iconKey: string; overview: string; details: string; benefits: string; displayOrder: string; isActive: boolean; image: string; imageFile: File | null };
@@ -55,6 +56,7 @@ const defaultGalleryForm: GalleryForm = { title: '', alt: '', category: 'Picture
 const defaultPackageForm: PackageForm = { slug: '', name: '', priceLabel: '', amount: '', currency: 'INR', period: '', features: [''], ctaLabel: 'Buy Plan', checkoutType: 'razorpay', isPopular: false, displayOrder: '', isActive: true };
 const defaultSiteSettingsForm: SiteSettingsForm = { livefitPhone: '+91 9890008742', workfitPhone: '+1 9256602776' };
 const defaultChatSettings: AdminChatSettings = { autoReplyEnabled: true, autoReplyMessage: 'Thanks for reaching out. A wellness expert will reply shortly.' };
+const defaultWorkfitHeroImages = ['/images/wh1.webp', '/images/wh2.webp', '/images/wh3.webp', '/images/wh4.webp'];
 
 const iconOptions = ['dumbbell', 'heart', 'brain', 'baby', 'flame', 'user-round', 'smile', 'users', 'user', 'trophy', 'sparkles', 'sun', 'clock', 'bed', 'leaf', 'zap', 'target', 'chair', 'wind', 'moon'];
 const challengeColorOptions = ['bg-orange-500', 'bg-green-500', 'bg-purple-500', 'bg-emerald-500', 'bg-blue-500', 'bg-rose-500', 'bg-teal-500', 'bg-amber-500'];
@@ -167,6 +169,9 @@ const AdminDashboard = () => {
   const [playlists, setPlaylists] = useState<AdminPlaylist[]>([]);
   const [galleryImages, setGalleryImages] = useState<AdminGalleryImage[]>([]);
   const [packages, setPackages] = useState<AdminPackage[]>([]);
+  const [workfitHero, setWorkfitHero] = useState<AdminWorkfitHeroContent>({ images: defaultWorkfitHeroImages });
+  const [workfitHeroFiles, setWorkfitHeroFiles] = useState<(File | null)[]>([null, null, null, null]);
+  const [savingWorkfitHero, setSavingWorkfitHero] = useState(false);
   const [chats, setChats] = useState<AdminChatThread[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
@@ -238,13 +243,14 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       resetMessages();
-      const [overviewRes, programsRes, yogaTypesRes, yogaChallengesRes, sectionRes, challengeSectionRes, challengesRes, playlistsRes, galleryRes, usersRes, paidUsersRes, packagesRes, chatsRes, chatSettingsRes, siteSettingsRes] = await Promise.all([
+      const [overviewRes, programsRes, yogaTypesRes, yogaChallengesRes, sectionRes, challengeSectionRes, workfitHeroRes, challengesRes, playlistsRes, galleryRes, usersRes, paidUsersRes, packagesRes, chatsRes, chatSettingsRes, siteSettingsRes] = await Promise.all([
         adminApiClient.get<AdminOverviewResponse>('/api/admin/overview', { headers: authHeaders }),
         adminApiClient.get<AdminYogaProgram[]>('/api/admin/yoga-programs', { headers: authHeaders }),
         adminApiClient.get<AdminYogaType[]>('/api/admin/yoga-types', { headers: authHeaders }),
         adminApiClient.get<AdminYogaChallenge[]>('/api/admin/yoga-challenges', { headers: authHeaders }),
         adminApiClient.get<AdminSectionContent>('/api/content/yoga-programs-section'),
         adminApiClient.get<AdminYogaChallengesSectionContent>('/api/content/yoga-challenges-section'),
+        adminApiClient.get<AdminWorkfitHeroContent>('/api/admin/workfit-hero', { headers: authHeaders }),
         adminApiClient.get<AdminWorkfitChallenge[]>('/api/admin/workfit-challenges', { headers: authHeaders }),
         adminApiClient.get<AdminPlaylist[]>('/api/admin/playlists', { headers: authHeaders }),
         adminApiClient.get<AdminGalleryImage[]>('/api/admin/gallery', { headers: authHeaders }),
@@ -261,6 +267,7 @@ const AdminDashboard = () => {
       setYogaChallenges(yogaChallengesRes.data);
       setSectionContent(sectionRes.data);
       setChallengeSectionContent(challengeSectionRes.data);
+      setWorkfitHero({ images: workfitHeroRes.data.images?.length ? workfitHeroRes.data.images : defaultWorkfitHeroImages });
       setChallenges(challengesRes.data);
       setPlaylists(playlistsRes.data);
       setGalleryImages(galleryRes.data);
@@ -327,6 +334,39 @@ const AdminDashboard = () => {
       setSuccessMessage('Yoga section heading content updated successfully.');
     } catch (err: unknown) { setError(getErrorMessage(err, 'Unable to update section content.')); }
     finally { setSavingSection(false); }
+  };
+
+  const handleWorkfitHeroSave = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!adminToken) return;
+
+    try {
+      setSavingWorkfitHero(true);
+      resetMessages();
+
+      const formData = new FormData();
+      workfitHeroFiles.forEach((file, index) => {
+        if (file) {
+          formData.append(`slide${index}`, file);
+        }
+      });
+
+      const response = await adminApiClient.put<{ message: string; data: AdminWorkfitHeroContent }>(
+        '/api/admin/workfit-hero',
+        formData,
+        { headers: { ...authHeaders, 'Content-Type': 'multipart/form-data' } }
+      );
+
+      setWorkfitHero({
+        images: response.data.data.images?.length ? response.data.data.images : defaultWorkfitHeroImages,
+      });
+      setWorkfitHeroFiles([null, null, null, null]);
+      setSuccessMessage('WorkFit hero images updated successfully.');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Unable to update WorkFit hero images.'));
+    } finally {
+      setSavingWorkfitHero(false);
+    }
   };
 
   const handleChallengeSectionSave = async (event: React.FormEvent) => {
@@ -621,6 +661,7 @@ const AdminDashboard = () => {
         <div className="admin-menu-group">
           <div className="admin-menu-label">Menu</div>
           <button type="button" className={`admin-menu-item ${activeView === 'dashboard' ? 'active' : ''}`} onClick={() => setView('dashboard')}><LayoutDashboard />Dashboard<ChevronRight className="arrow" /></button>
+          <button type="button" className={`admin-menu-item ${activeView === 'workfit-hero' ? 'active' : ''}`} onClick={() => setView('workfit-hero')}><Images />WorkFit Hero<ChevronRight className="arrow" /></button>
           <button type="button" className={`admin-menu-item ${activeView === 'yoga-programs' ? 'active' : ''}`} onClick={() => setView('yoga-programs')}><ClipboardList />Yoga Programs<ChevronRight className="arrow" /></button>
           <button type="button" className={`admin-menu-item ${activeView === 'yoga-types' ? 'active' : ''}`} onClick={() => setView('yoga-types')}><Leaf />Yoga Types<ChevronRight className="arrow" /></button>
           <button type="button" className={`admin-menu-item ${activeView === 'yoga-challenges' ? 'active' : ''}`} onClick={() => setView('yoga-challenges')}><Target />Yoga Challenges<ChevronRight className="arrow" /></button>
@@ -648,7 +689,7 @@ const AdminDashboard = () => {
         <header className="admin-topbar">
           <div className="admin-topbar-left">
             <button type="button" className="admin-toggle-btn" onClick={() => setSidebarOpen((value) => !value)}><Menu /></button>
-            <div className="admin-topbar-title"><h1>{activeView === 'dashboard' ? 'Admin Dashboard' : activeView === 'workfit-challenges' ? 'WorkFit Problems' : activeView.replace('-', ' ')}</h1><p>MongoDB content manager for LiveFit and WorkFit.</p></div>
+            <div className="admin-topbar-title"><h1>{activeView === 'dashboard' ? 'Admin Dashboard' : activeView === 'workfit-hero' ? 'WorkFit Hero' : activeView === 'workfit-challenges' ? 'WorkFit Problems' : activeView.replace('-', ' ')}</h1><p>MongoDB content manager for LiveFit and WorkFit.</p></div>
           </div>
           <div className="admin-topbar-right"><div className="admin-profile-icon">{adminUser.adminId.slice(0, 1).toUpperCase()}</div></div>
         </header>
@@ -662,6 +703,47 @@ const AdminDashboard = () => {
                 <div className="admin-panel-card">
                   <div className="admin-section-head"><div><h3>Users</h3><p>Total users are counted by unique visitor IP. Hardcoded dashboard profile, revenue, followers, and chart content were removed.</p></div></div>
                   <div className="admin-stats-grid one-card"><div className="admin-stat-card"><div className="admin-stat-info"><p>Total Users</p><h3>{overview.stats.uniqueVisitors}</h3><small>Unique IP visitors tracked from website traffic.</small></div><div className="admin-stat-icon icon-blue"><Users size={22} /></div></div></div>
+                </div>
+              )}
+
+              {activeView === 'workfit-hero' && (
+                <div className="admin-panel-card">
+                  <div className="admin-section-head">
+                    <div>
+                      <h3>WorkFit Hero Images</h3>
+                      <p>Replace only the four hero images used in the WorkFit homepage slider. The section copy stays unchanged.</p>
+                    </div>
+                  </div>
+                  <form onSubmit={handleWorkfitHeroSave}>
+                    <div className="admin-form-grid">
+                      {defaultWorkfitHeroImages.map((fallbackImage, index) => {
+                        const currentImage = workfitHero.images[index] || fallbackImage;
+                        const file = workfitHeroFiles[index];
+                        return (
+                          <div key={index} className="admin-form-field">
+                            <label>Slide {index + 1}</label>
+                            <div className="admin-image-preview">
+                              <img src={resolveYogaImageUrl(currentImage)} alt={`WorkFit hero slide ${index + 1}`} />
+                            </div>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(event) => setWorkfitHeroFiles((previous) => previous.map((item, itemIndex) => itemIndex === index ? event.target.files?.[0] || null : item))}
+                            />
+                            <small className="admin-muted" style={{ display: 'block', marginTop: 8 }}>
+                              {file ? `Selected: ${file.name}` : 'Choose a replacement image for this slide.'}
+                            </small>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="admin-modal-actions" style={{ padding: '18px 0 0' }}>
+                      <button type="submit" className="admin-primary-button" disabled={savingWorkfitHero}>
+                        <Save size={16} style={{ marginRight: 8 }} />
+                        {savingWorkfitHero ? 'Saving...' : 'Save WorkFit Hero Images'}
+                      </button>
+                    </div>
+                  </form>
                 </div>
               )}
 

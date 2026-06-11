@@ -11,12 +11,20 @@ import {
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { API_BASE_URL, buildMediaUrl } from '../lib/env';
+import { fetchWorkfitHeroContent } from '../lib/yogaPrograms';
 
 const BASE_URL = API_BASE_URL || 'http://localhost:5000';
 
 const resolveWorkfitImageUrl = (value: string) => {
   return buildMediaUrl(value) || value;
 };
+
+const defaultWorkfitHeroImages = [
+  '/images/wh1.webp',
+  '/images/wh2.webp',
+  '/images/wh3.webp',
+  '/images/wh4.webp',
+];
 
 type WorkfitChallenge = {
   id: string;
@@ -462,6 +470,7 @@ const WorkFit = () => {
   const [dbTestimonials, setDbTestimonials] = useState<any[]>([]);
   const [workfitChallenges, setWorkfitChallenges] = useState<WorkfitChallenge[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const [workfitHeroImages, setWorkfitHeroImages] = useState<string[]>(defaultWorkfitHeroImages);
 
   useEffect(() => {
     fetch(`${BASE_URL}/api/content/testimonials`)
@@ -484,6 +493,14 @@ const WorkFit = () => {
         if (Array.isArray(data)) setPlaylists(data);
       })
       .catch(err => console.error("Error loading playlists:", err));
+
+    fetchWorkfitHeroContent()
+      .then((data) => {
+        if (Array.isArray(data.images) && data.images.length > 0) {
+          setWorkfitHeroImages(data.images);
+        }
+      })
+      .catch(err => console.error("Error loading WorkFit hero content:", err));
   }, []);
 
   const getDynamicTestimonial = (index: number, defaultTestimonial: any) => {
@@ -515,9 +532,11 @@ const WorkFit = () => {
     { name: "Michael Johnson", title: "Director - People & Culture", company: "", country: "USA", text: "WorkFit is a game-changer for our workplace. We've noticed less stress, better focus, and a happier team.", tags: ["Stress Reduction", "Focus", "Happiness"] }
   ];
 
+  const heroImages = workfitHeroImages.length >= defaultWorkfitHeroImages.length ? workfitHeroImages : defaultWorkfitHeroImages;
+
   const slides = [
     {
-      image: '/images/wh1.webp',
+      image: heroImages[0] || defaultWorkfitHeroImages[0],
       badge: 'CORPORATE WELLNESS PLATFORM',
       badgeStyle: 'text',
       titleChunks: [
@@ -536,7 +555,7 @@ const WorkFit = () => {
       buttonStyle: 'screenshot'
     },
     {
-      image: '/images/wh2.webp',
+      image: heroImages[1] || defaultWorkfitHeroImages[1],
       iconBadge: true,
       iconColor: 'bg-[#3b82f6]',
       badgeColor: 'text-[#3b82f6]',
@@ -552,7 +571,7 @@ const WorkFit = () => {
       tagline: 'Stronger minds. Happier teams. Better workplaces.'
     },
     {
-      image: '/images/wh3.webp',
+      image: heroImages[2] || defaultWorkfitHeroImages[2],
       theme: 'dark',
       iconBadge: true,
       iconColor: 'bg-[#22c55e]',
@@ -596,7 +615,7 @@ const WorkFit = () => {
       tagline: 'Better habits. Stronger teams. Healthier workplaces.'
     },
     {
-      image: '/images/wh4.webp',
+      image: heroImages[3] || defaultWorkfitHeroImages[3],
       theme: 'dark',
       iconBadge: true,
       iconColor: 'bg-[#3b82f6]',

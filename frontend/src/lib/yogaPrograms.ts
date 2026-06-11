@@ -26,6 +26,10 @@ export type YogaProgramsSectionContent = {
   description: string;
 };
 
+export type WorkfitHeroContent = {
+  images: string[];
+};
+
 export type YogaChallenge = {
   id: string;
   title: string;
@@ -74,6 +78,11 @@ export const fetchYogaChallenges = async () => {
 
 export const fetchYogaChallengesSection = async () => {
   const response = await apiClient.get<YogaChallengesSectionContent>('/api/content/yoga-challenges-section');
+  return response.data;
+};
+
+export const fetchWorkfitHeroContent = async () => {
+  const response = await apiClient.get<WorkfitHeroContent>('/api/content/workfit-hero');
   return response.data;
 };
 
