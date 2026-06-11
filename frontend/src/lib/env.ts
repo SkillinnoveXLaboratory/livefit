@@ -11,8 +11,18 @@ export const buildMediaUrl = (value?: string | null) => {
     return value;
   }
 
-  if ((value.startsWith('/uploads/') || value.startsWith('/images/')) && API_BASE_URL) {
-    return `${API_BASE_URL}${value}`;
+  const normalizedValue = value.startsWith('/') ? value : `/${value}`;
+
+  if ((normalizedValue.startsWith('/uploads/') || normalizedValue.startsWith('/images/') || normalizedValue.startsWith('/api/uploads/') || normalizedValue.startsWith('/api/images/')) && API_BASE_URL) {
+    if (normalizedValue.startsWith('/api/uploads/')) {
+      return `${API_BASE_URL}${normalizedValue.replace('/api', '')}`;
+    }
+
+    if (normalizedValue.startsWith('/api/images/')) {
+      return `${API_BASE_URL}${normalizedValue.replace('/api', '')}`;
+    }
+
+    return `${API_BASE_URL}${normalizedValue}`;
   }
 
   return value;

@@ -78,6 +78,12 @@ app.get('/uploads/:fileName', async (req, res, next) => {
 app.get('/images/:fileName', async (req, res, next) => {
   return serveR2Media(req, res, next, 'images');
 });
+app.get('/api/uploads/:fileName', async (req, res, next) => {
+  return serveR2Media(req, res, next, 'uploads');
+});
+app.get('/api/images/:fileName', async (req, res, next) => {
+  return serveR2Media(req, res, next, 'images');
+});
 app.use('/uploads', express.static(uploadsDir));
 app.use('/images', express.static(imagesDir));
 
