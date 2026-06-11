@@ -230,7 +230,7 @@ const Schedule = () => {
 
               <Link
                 to="/pricing"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-white/20 bg-white/10 text-white font-bold uppercase tracking-widest text-[10px] shadow-sm hover:bg-white/16 transition-all backdrop-blur-sm"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-orange-500 px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-white shadow-lg shadow-orange-500/20 transition-all hover:bg-orange-600"
               >
                 View Membership Plans
                 <ArrowRight className="w-4 h-4" />

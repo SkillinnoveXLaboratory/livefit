@@ -214,24 +214,26 @@ const YogaTypes = () => {
                 exit={{ opacity: 0, y: 20, scale: 0.96 }}
                 transition={{ duration: 0.28, ease: 'easeOut' }}
               >
-                <div className="relative h-64 overflow-hidden md:h-80">
-                  <img src={selectedType.imageUrl} alt={selectedType.title} className="h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/20 to-transparent" />
+                <div className="relative overflow-hidden bg-slate-100">
+                  <img src={selectedType.imageUrl} alt={selectedType.title} className="block w-full h-auto object-center" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-white via-white/40 to-transparent" />
                   <button
                     type="button"
                     onClick={() => setSelectedType(null)}
-                    className="absolute right-5 top-5 rounded-full bg-white/90 p-2.5 text-slate-500 shadow-lg transition-colors hover:text-orange-500"
+                    className="absolute right-6 top-6 rounded-full bg-white/90 p-2.5 text-slate-400 shadow-lg transition-colors hover:text-orange-500"
                     aria-label="Close yoga type details"
                   >
                     <X className="h-5 w-5" />
                   </button>
-                  <div className="absolute bottom-6 left-6 right-6 flex items-end gap-4">
+                  <div className="absolute bottom-6 left-10 right-10 flex items-end gap-5">
                     <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.5rem] bg-orange-500 text-white shadow-2xl shadow-orange-500/40">
                       <selectedType.icon className="h-8 w-8" />
                     </div>
                     <div>
-                      <p className="mb-2 text-xs font-black uppercase tracking-[0.28em] text-orange-200">{selectedType.tagline}</p>
-                      <h2 className="font-serif text-3xl font-bold leading-tight text-white md:text-5xl">{selectedType.title}</h2>
+                      <h2 className="mb-2 font-serif text-3xl leading-none font-bold text-slate-900 md:text-4xl">
+                        {selectedType.title}
+                      </h2>
+                      <p className="text-sm font-bold uppercase tracking-[0.2em] text-orange-600">{selectedType.tagline}</p>
                     </div>
                   </div>
                 </div>

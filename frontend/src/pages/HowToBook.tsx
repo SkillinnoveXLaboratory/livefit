@@ -54,7 +54,7 @@ const HowToBook = () => {
               </div>
               <div className="mb-8">
                 <Calendar className="w-10 h-10 text-orange-500 mb-6" />
-                <h3 className="text-2xl font-bold text-sky-950 mb-4">Send Inquiries to Choose Your Program</h3>
+                <h3 className="text-2xl font-bold text-sky-950 mb-4">Choose Your Program</h3>
                 <p className="text-sky-900/60 leading-relaxed font-medium">
                   Explore our curated wellness library and select the program that aligns with your body's needs and goals.
                 </p>

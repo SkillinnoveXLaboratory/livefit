@@ -261,10 +261,10 @@ const UniqueNeeds = () => {
             <motion.div
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 40 }}
-              className="fixed left-1/2 top-1/2 z-[101] flex max-h-[90vh] w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-[3rem] bg-white shadow-2xl"
+              className="fixed left-1/2 top-1/2 z-[101] max-h-[90vh] w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[3rem] bg-white shadow-2xl"
             >
-              <div className="relative shrink-0 max-h-64 overflow-hidden md:max-h-72">
-                <img src={selectedProgram.image} alt={selectedProgram.title} className="block h-full w-full object-cover object-center" />
+              <div className="relative overflow-hidden bg-slate-100">
+                <img src={selectedProgram.image} alt={selectedProgram.title} className="block w-full h-auto" />
                 <div className="absolute inset-0 bg-gradient-to-t from-white via-white/40 to-transparent" />
                 <button
                   onClick={() => setSelectedProgram(null)}
@@ -285,7 +285,7 @@ const UniqueNeeds = () => {
                 </div>
               </div>
 
-              <div className="custom-scrollbar overflow-y-auto p-10 md:p-12">
+              <div className="p-10 md:p-12">
                 <div className="space-y-10">
                   <div className="rounded-[2rem] border border-orange-100/50 bg-white p-8">
                     <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-slate-900">

@@ -96,7 +96,7 @@ const IndividualClasses = () => {
                   <button
                     type="button"
                     className="px-6 py-4 text-slate-700 font-bold hover:text-orange-500 transition-colors flex items-center gap-3 group border border-orange-500 rounded-full"
-                    onClick={() => navigate('/livefitinquiry')}
+                    onClick={() => navigate('/how-it-works')}
                   >
                     <CirclePlay className="w-7 h-7 text-slate-800 group-hover:text-orange-500 transition-colors" />
                     How It Works
