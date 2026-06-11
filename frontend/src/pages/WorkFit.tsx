@@ -532,7 +532,8 @@ const WorkFit = () => {
     { name: "Michael Johnson", title: "Director - People & Culture", company: "", country: "USA", text: "WorkFit is a game-changer for our workplace. We've noticed less stress, better focus, and a happier team.", tags: ["Stress Reduction", "Focus", "Happiness"] }
   ];
 
-  const heroImages = workfitHeroImages.length >= defaultWorkfitHeroImages.length ? workfitHeroImages : defaultWorkfitHeroImages;
+  const heroImages = (workfitHeroImages.length >= defaultWorkfitHeroImages.length ? workfitHeroImages : defaultWorkfitHeroImages)
+    .map((image) => resolveWorkfitImageUrl(image));
 
   const slides = [
     {
